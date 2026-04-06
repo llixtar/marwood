@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, Plus, Minus, ShoppingCart } from 'lucide-react';
+import { Heart, Plus, Minus, ShoppingCart, Expand } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,27 +20,17 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { ProductQuickView } from '@/components/product/ProductQuickView';
 
-// --- МОКОВІ ДАНІ З МУЛЬТИ-ЛЕЙБЛАМИ ---
-const hitsProducts = [
-  { id: 1, name: 'Комплект BASIC', price: '295 грн', image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=600', sizes: ['S', 'M', 'L'], colors: ['#0a0a0a', '#ffffff'], badges: [{ type: 'hit', text: 'Хіт продажу' }, { type: 'new', text: 'NEW' }] },
-  { id: 2, name: 'Комплект з сіточки', price: '340 грн', oldPrice: '430 грн', image: 'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?q=80&w=600', sizes: ['S', 'M'], colors: ['#0a0a0a'], badges: [{ type: 'hit', text: 'Хіт продажу' }, { type: 'sale', text: '-20%' }] },
-  { id: 3, name: 'Мереживний боді', price: '650 грн', image: 'https://images.unsplash.com/photo-1508243529287-e21914733111?q=80&w=600', sizes: ['XS', 'S', 'M'], colors: ['#0a0a0a'], badges: [{ type: 'hit', text: 'Хіт продажу' }] },
-  { id: 4, name: 'Комплект з мережива', price: '565 грн', image: 'https://images.unsplash.com/photo-1515562141207-7a8f73cb55b1?q=80&w=600', sizes: ['XS', 'S', 'M'], colors: ['#0a0a0a', '#800020'], badges: [] },
-];
+type ShowcaseProps = {
+  hitsProducts: any[];
+  newProducts: any[];
+  saleProducts: any[];
+};
 
-const newProducts = [
-  { id: 6, name: 'Спортивний топ', price: '420 грн', image: 'https://images.unsplash.com/photo-1617392652178-953b1b9eeb2c?q=80&w=600', sizes: ['S', 'M', 'L'], colors: ['#0a0a0a', '#e5e7eb'], badges: [{ type: 'new', text: 'NEW' }] },
-  { id: 7, name: 'Базові сліпи', price: '150 грн', image: 'https://images.unsplash.com/photo-1608228068565-d021c17da623?q=80&w=600', sizes: ['S', 'M', 'L', 'XL'], colors: ['#ffffff', '#0a0a0a', '#d2b48c'], badges: [{ type: 'new', text: 'NEW' }] },
-];
-
-const saleProducts = [
-  { id: 10, name: 'Трусики бразиліани', price: '180 грн', oldPrice: '250 грн', image: 'https://images.unsplash.com/photo-1582715065287-31c360980fa2?q=80&w=600', sizes: ['S', 'M'], colors: ['#0a0a0a'], badges: [{ type: 'sale', text: '-28%' }] },
-  { id: 11, name: 'Комплект "Ніжність"', price: '399 грн', oldPrice: '550 грн', image: 'https://images.unsplash.com/photo-1521572008054-d890060d463e?q=80&w=600', sizes: ['S', 'L'], colors: ['#ffffff'], badges: [{ type: 'sale', text: '-27%' }] },
-];
-
-export function ProductShowcase() {
+export function ProductShowcase({ hitsProducts, newProducts, saleProducts }: ShowcaseProps) {
   const [isMounted, setIsMounted] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -63,28 +53,37 @@ export function ProductShowcase() {
           </TabsList>
 
           <TabsContent value="hits" className="w-full">
-            <ProductCarousel products={hitsProducts} isMounted={isMounted} />
+            <ProductCarousel products={hitsProducts} isMounted={isMounted} onSelectProduct={setSelectedProduct} />
           </TabsContent>
           <TabsContent value="new" className="w-full">
-            <ProductCarousel products={newProducts} isMounted={isMounted} />
+            <ProductCarousel products={newProducts} isMounted={isMounted} onSelectProduct={setSelectedProduct} />
           </TabsContent>
           <TabsContent value="sale" className="w-full">
-            <ProductCarousel products={saleProducts} isMounted={isMounted} />
+            <ProductCarousel products={saleProducts} isMounted={isMounted} onSelectProduct={setSelectedProduct} />
           </TabsContent>
         </Tabs>
       </div>
+
+      <ProductQuickView 
+        product={selectedProduct} 
+        isOpen={!!selectedProduct} 
+        onClose={() => setSelectedProduct(null)} 
+      />
     </section>
   );
 }
 
-function ProductCarousel({ products, isMounted }: { products: any[], isMounted: boolean }) {
+function ProductCarousel({ products, isMounted, onSelectProduct }: { products: any[], isMounted: boolean, onSelectProduct: (p: any) => void }) {
+  if (!products || products.length === 0) {
+    return <div className="py-12 text-center text-bottle/50 tracking-widest uppercase text-sm">Тут поки пусто</div>;
+  }
+
   return (
-    <Carousel opts={{ align: "start" }} className="w-full md:-mb-56">
-      <CarouselContent className="-ml-2 md:-ml-4 md:pb-56 pt-2">
+    <Carousel opts={{ align: "start" }} className="w-full md:-mb-52">
+      <CarouselContent className="-ml-2 md:-ml-4 md:pb-52 pt-2">
         {products.map((product) => (
-          // На мобілці basis-1/3 (3 в ряд), на планшеті 1/2, на десктопі 1/4
-          <CarouselItem key={product.id} className="pl-2 md:pl-4 basis-1/3 sm:basis-1/2 lg:basis-1/4">
-            <ProductCard product={product} />
+          <CarouselItem key={product.id} className="pl-2 md:pl-4 basis-1/2 sm:basis-1/3 lg:basis-1/4">
+            <ProductCard product={product} onSelect={() => onSelectProduct(product)} />
           </CarouselItem>
         ))}
       </CarouselContent>
@@ -99,85 +98,101 @@ function ProductCarousel({ products, isMounted }: { products: any[], isMounted: 
   );
 }
 
-function ProductCard({ product }: { product: any }) {
+function ProductCard({ product, onSelect }: { product: any, onSelect: () => void }) {
+  const currentPrice = product.discount_price ? product.discount_price : product.price;
+  const oldPrice = product.discount_price ? product.price : null;
+  const imageSrc = product.images && product.images.length > 0 ? product.images[0] : '';
+
   return (
-    <div className="group relative w-full bg-background rounded-md hover:z-50 flex flex-col h-full">
+    <div className="group relative w-full bg-background rounded-md hover:z-50 flex flex-col h-full border border-black/5 md:border-transparent">
       
-      {/* Контейнер картинки */}
-      <div className="relative h-[160px] md:h-[400px] w-full overflow-hidden rounded-t-md bg-bottle/5">
+      {/* Контейнер картинки (ЗМЕНШЕНА ВДВІЧІ ВИСОТА) */}
+      <div 
+        className="relative aspect-[3/4] md:h-[260px] md:aspect-auto w-full overflow-hidden bg-bottle/5 flex-shrink-0 cursor-pointer"
+        onClick={onSelect}
+      >
         
         {/* Головне посилання на картинку */}
-        <Link href={`/product/${product.id}`} className="absolute inset-0 z-0">
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
-          />
-        </Link>
+        {imageSrc ? (
+          <div className="absolute inset-0 z-0 bg-[#f8f8f8]">
+            <Image
+              src={imageSrc}
+              alt={product.title}
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+          </div>
+        ) : (
+          <div className="absolute inset-0 z-0 bg-[#f8f8f8] flex items-center justify-center text-xs text-bottle/30">Без фото</div>
+        )}
         
         {/* Бейджі (Колонка з лейблами) */}
-        <div className="absolute top-1 left-1 md:top-3 md:left-3 z-10 flex flex-col gap-1 pointer-events-none">
-          {product.badges?.map((badge: any, idx: number) => (
-            <div key={idx} className={`px-1.5 py-0.5 md:px-3 md:py-1 text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-milky rounded-sm ${
-              badge.type === 'new' ? 'bg-bottle' : 
-              badge.type === 'sale' ? 'bg-red-600' : 'bg-bottle/80 backdrop-blur-sm'
-            }`}>
-              {badge.text}
+        <div className="absolute top-2 left-2 md:top-3 md:left-3 z-10 flex flex-col gap-1 pointer-events-none">
+          {product.is_new && (
+            <div className="px-2 py-0.5 md:px-3 md:py-1 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-milky bg-bottle shadow-sm">
+              New
             </div>
-          ))}
+          )}
+          {product.discount_price && (
+            <div className="px-2 py-0.5 md:px-3 md:py-1 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white bg-red-600 shadow-sm">
+              Sale
+            </div>
+          )}
+          {product.sales_count > 0 && (
+             <div className="px-2 py-0.5 md:px-3 md:py-1 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-bottle bg-white/90 backdrop-blur-sm shadow-sm border border-bottle/10 flex items-center gap-1 w-fit">
+               <span className="text-sm border-none leading-none">🔥</span> Хіт
+             </div>
+          )}
         </div>
 
-        {/* --- МОБІЛЬНИЙ QUICK BUY (Шторка) --- */}
-        {/* Показуємо тільки на мобільному, відкриває шторку */}
+        {/* Швидке додавання (Мобілка) */}
         <div className="absolute bottom-2 right-2 z-20 md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <button className="bg-milky text-bottle p-1.5 rounded-full shadow-md border border-bottle/10 active:scale-95 transition-transform" aria-label="Швидка покупка">
+              <button className="bg-white/90 backdrop-blur-sm text-bottle w-8 h-8 rounded shadow-sm border border-bottle/10 active:scale-95 transition-transform flex items-center justify-center" aria-label="Швидка покупка">
                 <ShoppingCart className="w-4 h-4" />
               </button>
             </SheetTrigger>
             <SheetContent side="bottom" className="bg-milky rounded-t-2xl border-bottle/10 px-4 py-6">
               <SheetHeader className="text-left mb-4">
-                <SheetTitle className="text-bottle font-medium text-lg">{product.name}</SheetTitle>
-                <div className="flex gap-2 items-baseline">
-                  <p className={`font-bold ${product.oldPrice ? 'text-red-600' : 'text-bottle'}`}>{product.price}</p>
-                  {product.oldPrice && <p className="text-xs text-bottle/50 line-through">{product.oldPrice}</p>}
+                <SheetTitle className="text-bottle font-medium text-lg leading-tight">{product.title}</SheetTitle>
+                <div className="flex gap-2 items-baseline mt-1">
+                  {oldPrice ? (
+                    <>
+                      <p className="font-bold text-red-600 text-xl">{currentPrice} ₴</p>
+                      <p className="text-sm text-bottle/50 line-through">{oldPrice} ₴</p>
+                    </>
+                  ) : (
+                    <p className="font-bold text-bottle text-xl">{currentPrice} ₴</p>
+                  )}
                 </div>
               </SheetHeader>
               
               <div className="flex flex-col gap-4">
-                {/* Розмір */}
-                <div>
-                  <p className="text-xs text-bottle/60 mb-2 uppercase tracking-wider">Розмір</p>
-                  <div className="flex gap-2 flex-wrap">
-                    {product.sizes.map((size: string) => (
-                      <button key={size} className="min-w-[2.5rem] px-2 h-10 rounded-md border border-bottle/20 flex items-center justify-center text-sm font-medium text-bottle hover:border-bottle hover:bg-bottle/5 transition-colors">
-                        {size}
-                      </button>
-                    ))}
+                {product.sizes && product.sizes.length > 0 && (
+                  <div>
+                    <p className="text-xs text-bottle/60 mb-2 uppercase tracking-wider font-bold">Розмір</p>
+                    <div className="flex gap-2 flex-wrap">
+                      {product.sizes.map((size: string) => (
+                        <button key={size} className="min-w-[2.5rem] px-3 h-10 rounded-none border border-bottle/20 flex items-center justify-center text-sm font-medium text-bottle focus:bg-bottle focus:text-white transition-colors">
+                          {size}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Колір */}
-                <div>
-                  <p className="text-xs text-bottle/60 mb-2 uppercase tracking-wider">Колір</p>
-                  <div className="flex gap-3">
-                    {product.colors.map((color: string, index: number) => (
-                      <button key={index} className={`w-8 h-8 rounded-full border shadow-sm ${color === '#ffffff' ? 'border-bottle/20' : 'border-transparent'}`} style={{ backgroundColor: color }} />
-                    ))}
+                {product.color && (
+                  <div className="mt-2">
+                     <p className="text-xs text-bottle/60 mb-2 uppercase tracking-wider font-bold">Колір</p>
+                     <span className="text-xs font-medium text-white bg-bottle px-3 py-1.5">{product.color}</span>
                   </div>
-                </div>
+                )}
 
                 {/* Кнопки мобілка */}
-                <div className="flex items-center gap-2 mt-4">
-                  <div className="flex items-center border border-bottle/20 rounded-md h-12 w-28">
-                    <button className="flex-1 flex items-center justify-center text-bottle"><Minus className="w-4 h-4" /></button>
-                    <span className="text-base font-medium w-8 text-center">1</span>
-                    <button className="flex-1 flex items-center justify-center text-bottle"><Plus className="w-4 h-4" /></button>
-                  </div>
-                  <Button className="flex-1 bg-bottle text-milky h-12 rounded-md uppercase tracking-wider text-sm">
-                    Купити
+                <div className="flex items-center gap-2 mt-4 pt-4 border-t border-bottle/10">
+                  <Button className="flex-1 bg-bottle text-milky h-12 rounded-none uppercase tracking-widest text-xs font-bold">
+                    Купити зараз
                   </Button>
                 </div>
               </div>
@@ -187,49 +202,52 @@ function ProductCard({ product }: { product: any }) {
       </div>
 
       {/* Інформація під картинкою */}
-      <div className="pt-2 md:pt-4 pb-2 md:pb-4 relative bg-background z-10 transition-all duration-300 flex-1 flex flex-col justify-between">
-        <Link href={`/product/${product.id}`} className="block">
-          <h3 className="font-medium text-bottle text-[10px] md:text-lg hover:underline underline-offset-4 line-clamp-2 md:line-clamp-1 leading-tight">{product.name}</h3>
-        </Link>
+      <div className="p-3 md:p-4 pb-4 md:pb-4 relative bg-white z-10 transition-all duration-300 flex-1 flex flex-col justify-between cursor-pointer" onClick={onSelect}>
+        <div>
+          <h3 className="font-medium text-bottle text-[11px] md:text-sm hover:underline underline-offset-4 line-clamp-2 leading-snug uppercase tracking-wide">
+            {product.title}
+          </h3>
+        </div>
         
-        <div className="flex flex-col md:flex-row md:items-baseline gap-0 md:gap-2 mt-1">
-          <p className={`font-bold text-xs md:text-base ${product.oldPrice ? 'text-red-600' : 'text-bottle'}`}>{product.price}</p>
-          {product.oldPrice && (
-            <p className="text-[9px] md:text-xs text-bottle/50 line-through">{product.oldPrice}</p>
+        <div className="flex flex-col md:flex-row md:items-baseline gap-0 md:gap-2 mt-2">
+          {oldPrice ? (
+            <>
+              <p className="font-bold text-sm md:text-base text-red-600">{currentPrice} ₴</p>
+              <p className="text-[10px] md:text-xs text-bottle/50 line-through">{oldPrice} ₴</p>
+            </>
+          ) : (
+            <p className="font-bold text-sm md:text-base text-bottle">{currentPrice} ₴</p>
           )}
         </div>
         
         {/* ДЕСКТОПНЕ ХОВЕР-МЕНЮ (Приховане на мобілці) */}
-        <div className="absolute top-full left-0 w-full bg-background border border-t-0 border-bottle/10 rounded-b-md p-4 opacity-0 pointer-events-none md:group-hover:opacity-100 md:group-hover:pointer-events-auto translate-y-[-10px] md:group-hover:translate-y-0 transition-all duration-300 shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1)] z-20 flex-col gap-4 hidden md:flex">
-          {/* ... Вміст десктопного меню залишився без змін ... */}
-          <div>
-            <p className="text-xs text-bottle/60 mb-2 uppercase tracking-wider">Розмір</p>
-            <div className="flex gap-2 flex-wrap">
-              {product.sizes.map((size: string) => (
-                <button key={size} className="min-w-[2rem] px-2 h-8 rounded-full border border-bottle/20 flex items-center justify-center text-xs font-medium text-bottle hover:border-bottle hover:bg-bottle/5 transition-colors">
-                  {size}
-                </button>
-              ))}
+        <div className="absolute top-1/2 left-0 w-full bg-white border border-t-0 border-bottle/10 p-5 opacity-0 pointer-events-none md:group-hover:opacity-100 md:group-hover:pointer-events-auto translate-y-[-10px] md:group-hover:translate-y-0 transition-all duration-300 shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1)] z-20 flex-col gap-4 hidden md:flex">
+          
+          {product.sizes && product.sizes.length > 0 && (
+            <div>
+              <p className="text-[10px] text-bottle/60 mb-2 uppercase tracking-widest font-bold">Розмір</p>
+              <div className="flex gap-2 flex-wrap">
+                {product.sizes.map((size: string) => (
+                  <button key={size} className="min-w-[2rem] px-2 h-8 border border-bottle/10 flex items-center justify-center text-xs font-medium text-bottle hover:border-bottle hover:bg-bottle focus:bg-bottle focus:text-white transition-colors">
+                    {size}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-          <div>
-            <p className="text-xs text-bottle/60 mb-2 uppercase tracking-wider">Колір</p>
-            <div className="flex gap-2">
-              {product.colors.map((color: string, index: number) => (
-                <button key={index} className={`w-6 h-6 rounded-full border shadow-sm hover:scale-110 transition-transform ${color === '#ffffff' ? 'border-bottle/20' : 'border-transparent'}`} style={{ backgroundColor: color }} />
-              ))}
+          )}
+
+          {product.color && (
+            <div>
+              <p className="text-[10px] text-bottle/60 mb-2 uppercase tracking-widest font-bold">Колір</p>
+              <span className="text-[10px] font-bold text-white bg-bottle px-2 py-1">{product.color}</span>
             </div>
-          </div>
+          )}
+
           <div className="flex items-center gap-2 mt-2">
-            <div className="flex items-center border border-bottle/20 rounded-md h-10 w-24">
-              <button className="flex-1 flex items-center justify-center text-bottle hover:bg-bottle/5 h-full"><Minus className="w-3 h-3" /></button>
-              <span className="text-sm font-medium w-8 text-center">1</span>
-              <button className="flex-1 flex items-center justify-center text-bottle hover:bg-bottle/5 h-full"><Plus className="w-3 h-3" /></button>
-            </div>
-            <Button className="flex-1 bg-bottle text-milky hover:bg-bottle/90 h-10 rounded-md uppercase tracking-wider text-xs">
-              Купити
+            <Button className="flex-1 bg-bottle text-milky hover:bg-bottle/90 h-10 rounded-none uppercase tracking-[0.2em] text-[10px] font-bold">
+              В кошик
             </Button>
-            <Button variant="outline" size="icon" className="h-10 w-10 border-bottle/20 text-bottle hover:bg-bottle/5 rounded-md flex-shrink-0">
+            <Button variant="outline" size="icon" className="h-10 w-10 border-bottle/20 text-bottle hover:bg-red-50 hover:text-red-500 hover:border-red-200 rounded-none flex-shrink-0 transition-colors">
               <Heart className="w-4 h-4" />
             </Button>
           </div>

@@ -12,23 +12,24 @@ import {
 
 // Дані для верхнього ряду (3 картинки)
 const topCategories = [
-  { id: 1, title: 'Еротична білизна', link: '/category/erotic', image: 'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?q=80&w=800' },
-  { id: 2, title: 'Костюми еротичні', link: '/category/costumes', image: 'https://images.unsplash.com/photo-1574634534833-28929bb1f6eb?q=80&w=800' }, // Змінене фото
-  { id: 3, title: 'Піжами', link: '/category/pajamas', image: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=800' },
+  { id: 1, title: 'Еротична білизна', link: '/category/erotic', image: '/categories/erotic.jpg' },
+  { id: 2, title: 'Костюми еротичні', link: '/category/costumes', image: '/categories/costumes.jpg' },
+  { id: 3, title: 'Піжами', link: '/category/pajamas', image: '/categories/pajamas.jpg' },
 ];
 
-// Дані для нижнього ряду (4 картинки)
+// Дані для нижнього ряду (5 картинок)
 const bottomCategories = [
-  { id: 4, title: 'Базова білизна', link: '/category/basic', image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=800' },
-  { id: 5, title: 'Труси', link: '/category/panties', image: 'https://images.unsplash.com/photo-1617392652178-953b1b9eeb2c?q=80&w=800' }, // Змінене фото
-  { id: 6, title: 'Боді', link: '/category/body', image: 'https://images.unsplash.com/photo-1508243529287-e21914733111?q=80&w=800' },
-  { id: 7, title: 'Халати', link: '/category/robes', image: 'https://images.unsplash.com/photo-1583532452513-a02186582ccd?q=80&w=800' },
+  { id: 4, title: 'Базова білизна', link: '/category/basic', image: '/categories/basic.jpg' },
+  { id: 5, title: 'Труси', link: '/category/panties', image: '/categories/panties2.jpg' },
+  { id: 6, title: 'Боді', link: '/category/body', image: '/categories/body.jpg' },
+  { id: 7, title: 'Халати', link: '/category/robes', image: '/categories/robes.jpg' },
+  { id: 8, title: 'Плюс сайз', link: '/category/plus-size', image: '/categories/plus-size.jpg' },
 ];
 
 export function CatalogGallery() {
-  // Налаштовуємо таймери для каруселей (stopOnInteraction: true означає, що коли юзер почне свайпати сам, таймер зупиниться)
-  const pluginTop = React.useRef(Autoplay({ delay: 3000, stopOnInteraction: true }));
-  const pluginBottom = React.useRef(Autoplay({ delay: 4000, stopOnInteraction: true }));
+  // Налаштовуємо таймери для каруселей: не зупиняти повністю після свайпу, але паузнути при наведенні або взаємодії
+  const pluginTop = React.useRef(Autoplay({ delay: 3000, stopOnInteraction: false }));
+  const pluginBottom = React.useRef(Autoplay({ delay: 4000, stopOnInteraction: false }));
 
   return (
     <section className="w-full py-12 px-4">
@@ -45,8 +46,8 @@ export function CatalogGallery() {
               <CategoryCard key={cat.id} category={cat} />
             ))}
           </div>
-          {/* Нижній ряд: 4 колонки */}
-          <div className="grid grid-cols-4 gap-4 h-[350px]">
+          {/* Нижній ряд: 5 колонок */}
+          <div className="grid grid-cols-5 gap-4 h-[350px]">
             {bottomCategories.map((cat) => (
               <CategoryCard key={cat.id} category={cat} />
             ))}
@@ -56,39 +57,42 @@ export function CatalogGallery() {
         {/* --- МОБІЛЬНА ВЕРСІЯ (Каруселі) --- */}
         <div className="md:hidden flex flex-col gap-6">
           {/* Карусель 1: Верхні категорії */}
-          <Carousel 
-            plugins={[pluginTop.current]}
-            opts={{ align: "center", loop: true }} 
-            className="w-full"
-          >
+          <div className="w-full" onMouseEnter={() => pluginTop.current.stop()} onMouseLeave={() => pluginTop.current.play()} onTouchStart={() => pluginTop.current.stop()} onTouchEnd={() => pluginTop.current.play()}>
+            <Carousel
+              plugins={[pluginTop.current]}
+              opts={{ align: "start", loop: true }}
+              className="w-full"
+            >
             <CarouselContent>
               {topCategories.map((cat) => (
-                // Змінили basis на 100%, щоб картинка була по центру і не показувала наступну
-                <CarouselItem key={cat.id} className="basis-full">
-                  <div className="h-[450px]">
+                <CarouselItem key={cat.id} className="basis-1/2">
+                  <div className="h-[240px]">
                     <CategoryCard category={cat} />
                   </div>
                 </CarouselItem>
               ))}
             </CarouselContent>
-          </Carousel>
+            </Carousel>
+          </div>
 
           {/* Карусель 2: Нижні категорії */}
-          <Carousel 
-            plugins={[pluginBottom.current]}
-            opts={{ align: "center", loop: true }} 
-            className="w-full"
-          >
-            <CarouselContent>
-              {bottomCategories.map((cat) => (
-                <CarouselItem key={cat.id} className="basis-full">
-                  <div className="h-[400px]">
+          <div className="w-full" onMouseEnter={() => pluginBottom.current.stop()} onMouseLeave={() => pluginBottom.current.play()} onTouchStart={() => pluginBottom.current.stop()} onTouchEnd={() => pluginBottom.current.play()}>
+            <Carousel
+              plugins={[pluginBottom.current]}
+              opts={{ align: "start", loop: true }}
+              className="w-full"
+            >
+              <CarouselContent>
+                {bottomCategories.map((cat) => (
+                  <CarouselItem key={cat.id} className="basis-1/3 px-1">
+                    <div className="h-[160px]">
                     <CategoryCard category={cat} />
                   </div>
                 </CarouselItem>
               ))}
             </CarouselContent>
-          </Carousel>
+            </Carousel>
+          </div>
         </div>
 
       </div>
@@ -99,7 +103,7 @@ export function CatalogGallery() {
 // Допоміжний компонент картки
 function CategoryCard({ category }: { category: { title: string, link: string, image: string } }) {
   return (
-    <Link href={category.link} className="relative block w-full h-full overflow-hidden group rounded-md">
+    <Link href={category.link} className="relative block w-full h-full overflow-hidden group">
       <Image
         src={category.image}
         alt={category.title}
@@ -108,7 +112,7 @@ function CategoryCard({ category }: { category: { title: string, link: string, i
       />
       {/* Градієнт знизу для читабельності тексту */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
-      
+
       {/* Текст */}
       <div className="absolute bottom-6 left-6 text-white">
         <h3 className="text-2xl uppercase tracking-widest font-light drop-shadow-md">

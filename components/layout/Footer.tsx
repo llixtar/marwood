@@ -48,7 +48,7 @@ export function Footer() {
           
           {/* Блок 1: Про бренд */}
           <div className="flex flex-col gap-6">
-            <Link href="/" className="text-3xl font-bold uppercase tracking-[0.3em]">
+            <Link href="/admin" className="text-3xl font-bold uppercase tracking-[0.3em]" title="Доступ до адмін-панелі">
               Marwood
             </Link>
             <p className="text-sm opacity-80 leading-relaxed max-w-[280px]">

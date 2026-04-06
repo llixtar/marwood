@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Menu, ShoppingCart, User, Heart, ChevronDown } from 'lucide-react';
+import { Menu, ShoppingCart, User, Heart, ChevronDown, LayoutGrid } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -45,11 +45,11 @@ export function Header() {
                   <SheetDescription>Навігація по категоріям</SheetDescription>
                 </SheetHeader>
                 
-                <nav className="flex flex-col gap-2 mt-8">
+                <nav className="flex flex-col gap-2 mt-8 pl-6">
                   
                   {/* КАТАЛОГ (Мобільний випадаючий список) */}
                   <details className="group py-2">
-                    <summary className="flex cursor-pointer list-none items-center justify-between text-xl font-medium text-bottle [&::-webkit-details-marker]:hidden">
+                    <summary className="flex cursor-pointer list-none items-center gap-2 text-xl font-medium text-bottle [&::-webkit-details-marker]:hidden">
                       Каталог
                       <ChevronDown className="h-5 w-5 transition-transform group-open:rotate-180" />
                     </summary>
@@ -61,6 +61,7 @@ export function Header() {
                       <SheetClose asChild><Link href="/category/robes" className="text-base text-bottle/80 hover:text-bottle">Халати</Link></SheetClose>
                       <SheetClose asChild><Link href="/category/pajamas" className="text-base text-bottle/80 hover:text-bottle">Піжами</Link></SheetClose>
                       <SheetClose asChild><Link href="/category/body" className="text-base text-bottle/80 hover:text-bottle">Боді</Link></SheetClose>
+                      <SheetClose asChild><Link href="/category/plus-size" className="text-base text-bottle/80 hover:text-bottle">Плюс сайз</Link></SheetClose>
                     </div>
                   </details>
 
@@ -75,7 +76,7 @@ export function Header() {
 
                   {/* ІНФОРМАЦІЯ (Мобільний випадаючий список) */}
                   <details className="group py-2">
-                    <summary className="flex cursor-pointer list-none items-center justify-between text-xl font-medium text-bottle [&::-webkit-details-marker]:hidden">
+                    <summary className="flex cursor-pointer list-none items-center gap-2 text-xl font-medium text-bottle [&::-webkit-details-marker]:hidden">
                       Інформація
                       <ChevronDown className="h-5 w-5 transition-transform group-open:rotate-180" />
                     </summary>
@@ -101,22 +102,24 @@ export function Header() {
                   <NavigationMenuTrigger 
                     onPointerEnter={(e) => e.preventDefault()}
                     onPointerLeave={(e) => e.preventDefault()}
-                    className="bg-transparent text-bottle hover:bg-bottle/5"
+                    className="!bg-bottle !text-white hover:!bg-bottle/90 data-[state=open]:!bg-bottle/90 rounded-full px-5 py-2.5 h-auto flex items-center gap-2 group transition-all"
                   >
-                    Каталог
+                    <LayoutGrid className="w-4 h-4 opacity-80" />
+                    <span className="font-semibold tracking-wide">Каталог</span>
                   </NavigationMenuTrigger>
                   <NavigationMenuContent
                     onPointerEnter={(e) => e.preventDefault()}
                     onPointerLeave={(e) => e.preventDefault()}
                   >
-                    <ul className="grid w-[400px] gap-3 p-4 md:w-[600px] md:grid-cols-2 bg-milky shadow-2xl border border-bottle/10 rounded-md">
-                      <li><Link href="/category/panties" className="block p-3 hover:bg-bottle/5 text-bottle rounded-md transition-colors">Труси</Link></li>
-                      <li><Link href="/category/basic" className="block p-3 hover:bg-bottle/5 text-bottle rounded-md transition-colors">Базова білизна</Link></li>
-                      <li><Link href="/category/erotic" className="block p-3 hover:bg-bottle/5 text-bottle rounded-md transition-colors">Еротична білизна</Link></li>
-                      <li><Link href="/category/costumes" className="block p-3 hover:bg-bottle/5 text-bottle rounded-md transition-colors">Костюми еротичні</Link></li>
-                      <li><Link href="/category/robes" className="block p-3 hover:bg-bottle/5 text-bottle rounded-md transition-colors">Халати</Link></li>
-                      <li><Link href="/category/pajamas" className="block p-3 hover:bg-bottle/5 text-bottle rounded-md transition-colors">Піжами</Link></li>
-                      <li><Link href="/category/body" className="block p-3 hover:bg-bottle/5 text-bottle rounded-md transition-colors">Боді</Link></li>
+                    <ul className="flex flex-col w-[260px] p-2 bg-milky shadow-2xl border border-bottle/10 rounded-2xl">
+                      <li><NavigationMenuLink asChild><Link href="/category/panties" className="block px-4 py-2 hover:bg-bottle hover:text-white text-bottle rounded-xl transition-all text-sm font-medium">Труси</Link></NavigationMenuLink></li>
+                      <li><NavigationMenuLink asChild><Link href="/category/basic" className="block px-4 py-2 hover:bg-bottle hover:text-white text-bottle rounded-xl transition-all text-sm font-medium">Базова білизна</Link></NavigationMenuLink></li>
+                      <li><NavigationMenuLink asChild><Link href="/category/erotic" className="block px-4 py-2 hover:bg-bottle hover:text-white text-bottle rounded-xl transition-all text-sm font-medium">Еротична білизна</Link></NavigationMenuLink></li>
+                      <li><NavigationMenuLink asChild><Link href="/category/costumes" className="block px-4 py-2 hover:bg-bottle hover:text-white text-bottle rounded-xl transition-all text-sm font-medium">Костюми еротичні</Link></NavigationMenuLink></li>
+                      <li><NavigationMenuLink asChild><Link href="/category/robes" className="block px-4 py-2 hover:bg-bottle hover:text-white text-bottle rounded-xl transition-all text-sm font-medium">Халати</Link></NavigationMenuLink></li>
+                      <li><NavigationMenuLink asChild><Link href="/category/pajamas" className="block px-4 py-2 hover:bg-bottle hover:text-white text-bottle rounded-xl transition-all text-sm font-medium">Піжами</Link></NavigationMenuLink></li>
+                      <li><NavigationMenuLink asChild><Link href="/category/body" className="block px-4 py-2 hover:bg-bottle hover:text-white text-bottle rounded-xl transition-all text-sm font-medium">Боді</Link></NavigationMenuLink></li>
+                      <li><NavigationMenuLink asChild><Link href="/category/plus-size" className="block px-4 py-2 hover:bg-bottle hover:text-white text-bottle rounded-xl transition-all text-sm font-medium">Плюс сайз</Link></NavigationMenuLink></li>
                     </ul>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
@@ -141,9 +144,9 @@ export function Header() {
                     onPointerLeave={(e) => e.preventDefault()}
                   >
                     <ul className="grid w-[240px] gap-2 p-4 bg-milky shadow-2xl border border-bottle/10 rounded-md">
-                      <li><Link href="/delivery" className="block p-3 hover:bg-bottle/5 text-bottle rounded-md transition-colors text-sm">Оплата і доставка</Link></li>
-                      <li><Link href="/returns" className="block p-3 hover:bg-bottle/5 text-bottle rounded-md transition-colors text-sm">Обмін та повернення</Link></li>
-                      <li><Link href="/reviews" className="block p-3 hover:bg-bottle/5 text-bottle rounded-md transition-colors text-sm">Відгуки</Link></li>
+                      <li><NavigationMenuLink asChild><Link href="/delivery" className="block p-3 hover:bg-bottle hover:text-white text-bottle rounded-md transition-all text-sm font-medium">Оплата і доставка</Link></NavigationMenuLink></li>
+                      <li><NavigationMenuLink asChild><Link href="/returns" className="block p-3 hover:bg-bottle hover:text-white text-bottle rounded-md transition-all text-sm font-medium">Обмін та повернення</Link></NavigationMenuLink></li>
+                      <li><NavigationMenuLink asChild><Link href="/reviews" className="block p-3 hover:bg-bottle hover:text-white text-bottle rounded-md transition-all text-sm font-medium">Відгуки</Link></NavigationMenuLink></li>
                     </ul>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
