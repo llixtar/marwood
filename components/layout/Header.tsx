@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Menu, ShoppingCart, User, Heart, ChevronDown, LayoutGrid } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { GlobalSearch } from './GlobalSearch';
 import {
   Sheet,
   SheetContent,
@@ -165,6 +166,8 @@ export function Header() {
 
         {/* --- ПРАВА ЧАСТИНА (Іконки) --- */}
         <div className="flex-1 flex items-center justify-end gap-1 md:gap-4">
+          <GlobalSearch />
+
           <Button variant="ghost" size="icon" className="text-bottle hover:bg-bottle/5 hidden sm:flex">
             <Heart className="h-5 w-5" />
           </Button>
