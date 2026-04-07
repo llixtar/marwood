@@ -45,7 +45,7 @@ export function Footer() {
     <footer className="bg-bottle text-milky pt-16 pb-8">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-16">
-          
+
           {/* Блок 1: Про бренд */}
           <div className="flex flex-col gap-6">
             <Link href="/admin" className="text-3xl font-bold uppercase tracking-[0.3em]" title="Доступ до адмін-панелі">
@@ -64,17 +64,6 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Блок 2: Каталог */}
-          <div className="flex flex-col gap-4">
-            <h4 className="text-sm font-semibold uppercase tracking-widest mb-2">Каталог</h4>
-            <div className="flex flex-col gap-3">
-              {['Труси', 'Базова білизна', 'Еротична білизна', 'Боді', 'Халати'].map((item) => (
-                <Link key={item} href="/catalog" className="text-sm opacity-70 hover:opacity-100 hover:translate-x-1 transition-all">
-                  {item}
-                </Link>
-              ))}
-            </div>
-          </div>
 
           {/* Блок 3: Клієнтам */}
           <div className="flex flex-col gap-4">
@@ -102,7 +91,7 @@ export function Footer() {
               </div>
               <div className="flex items-start gap-3 text-sm opacity-80">
                 <MapPin className="w-5 h-5 flex-shrink-0" strokeWidth={1.5} />
-                <span>Відправка з м. Хмельницький<br/>по всій Україні</span>
+                <span>Відправка з м. Хмельницький<br />по всій Україні</span>
               </div>
             </div>
           </div>
