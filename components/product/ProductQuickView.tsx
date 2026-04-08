@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { ShoppingCart, Heart, ShieldCheck, Ruler, Truck, ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { useCartStore } from '@/lib/store/cartStore';
 
 type ProductQuickViewProps = {
   product: any;
@@ -54,6 +55,8 @@ export function ProductQuickView({ product: initialProduct, isOpen, onClose }: P
     }
   }, [isOpen, product?.sku]);
 
+  const { addItem, openCart } = useCartStore();
+
   if (!product) return null;
 
   const handleAddToCart = () => {
@@ -63,8 +66,21 @@ export function ProductQuickView({ product: initialProduct, isOpen, onClose }: P
       return;
     }
     
-    setShowToast('Товар успішно додано до кошика! 🛍️');
-    setTimeout(() => setShowToast(''), 3000);
+    addItem({
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      discount_price: product.discount_price,
+      image: product.images?.[0],
+      selectedSize: selectedSize || undefined,
+    });
+
+    setShowToast('Товар додано до кошика! 🛍️');
+    setTimeout(() => {
+      setShowToast('');
+      onClose();
+      openCart();
+    }, 800);
   };
 
   const handleAddLike = () => {

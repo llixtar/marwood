@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { Menu, ShoppingCart, User, Heart, ChevronDown, LayoutGrid } from 'lucide-react';
+import { Menu, Heart, ChevronDown, LayoutGrid } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { GlobalSearch } from './GlobalSearch';
+import { CartButton } from '@/components/cart/CartButton';
+import { AuthButton } from '@/components/auth/AuthProvider';
 import {
   Sheet,
   SheetContent,
@@ -172,16 +174,9 @@ export function Header() {
             <Heart className="h-5 w-5" />
           </Button>
           
-          <Button variant="ghost" size="icon" className="text-bottle hover:bg-bottle/5">
-            <User className="h-5 w-5" />
-          </Button>
+          <AuthButton />
 
-          <Button variant="ghost" size="icon" className="relative text-bottle hover:bg-bottle/5">
-            <ShoppingCart className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-bottle text-milky text-[9px] flex items-center justify-center font-bold">
-              0
-            </span>
-          </Button>
+          <CartButton />
         </div>
 
       </div>

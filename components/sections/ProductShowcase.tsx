@@ -13,14 +13,9 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { ProductQuickView } from '@/components/product/ProductQuickView';
+import { useCartStore } from '@/lib/store/cartStore';
 
 type ShowcaseProps = {
   hitsProducts: any[];
@@ -87,7 +82,6 @@ function ProductCarousel({ products, isMounted, onSelectProduct }: { products: a
           </CarouselItem>
         ))}
       </CarouselContent>
-      
       {isMounted && (
         <div className="hidden lg:block">
           <CarouselPrevious className="-left-12 border-bottle/20 hover:bg-bottle hover:text-milky" />
@@ -102,11 +96,36 @@ function ProductCard({ product, onSelect }: { product: any, onSelect: () => void
   const currentPrice = product.discount_price ? product.discount_price : product.price;
   const oldPrice = product.discount_price ? product.price : null;
   const imageSrc = product.images && product.images.length > 0 ? product.images[0] : '';
+  
+  const { addItem, openCart } = useCartStore();
+  const [selectedSize, setSelectedSize] = useState<string>('');
+  const [showToast, setShowToast] = useState('');
+
+  const handleAddToCart = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    
+    if (product.sizes?.length > 0 && !selectedSize) {
+      setShowToast('Будь ласка, оберіть розмір!');
+      setTimeout(() => setShowToast(''), 3000);
+      return;
+    }
+    
+    addItem({
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      discount_price: product.discount_price,
+      image: product.images?.[0],
+      selectedSize: selectedSize || undefined,
+    });
+    
+    openCart();
+  };
 
   return (
     <div className="group relative w-full bg-background rounded-md hover:z-50 flex flex-col h-full border border-black/5 md:border-transparent">
       
-      {/* Контейнер картинки (ЗМЕНШЕНА ВДВІЧІ ВИСОТА) */}
+      {/* Контейнер картинки */}
       <div 
         className="relative aspect-[3/4] md:h-[260px] md:aspect-auto w-full overflow-hidden bg-bottle/5 flex-shrink-0 cursor-pointer"
         onClick={onSelect}
@@ -126,7 +145,7 @@ function ProductCard({ product, onSelect }: { product: any, onSelect: () => void
           <div className="absolute inset-0 z-0 bg-[#f8f8f8] flex items-center justify-center text-xs text-bottle/30">Без фото</div>
         )}
         
-        {/* Бейджі (Колонка з лейблами) */}
+        {/* Бейджі */}
         <div className="absolute top-2 left-2 md:top-3 md:left-3 z-10 flex flex-col gap-1 pointer-events-none">
           {product.is_new && (
             <div className="px-2 py-0.5 md:px-3 md:py-1 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-milky bg-bottle shadow-sm">
@@ -146,7 +165,7 @@ function ProductCard({ product, onSelect }: { product: any, onSelect: () => void
         </div>
 
         {/* Швидке додавання (Мобілка) */}
-        <div className="absolute bottom-2 right-2 z-20 md:hidden">
+        <div className="absolute bottom-2 right-2 z-20 md:hidden" onClick={(e) => e.stopPropagation()}>
           <Sheet>
             <SheetTrigger asChild>
               <button className="bg-white/90 backdrop-blur-sm text-bottle w-8 h-8 rounded shadow-sm border border-bottle/10 active:scale-95 transition-transform flex items-center justify-center" aria-label="Швидка покупка">
@@ -174,7 +193,15 @@ function ProductCard({ product, onSelect }: { product: any, onSelect: () => void
                     <p className="text-xs text-bottle/60 mb-2 uppercase tracking-wider font-bold">Розмір</p>
                     <div className="flex gap-2 flex-wrap">
                       {product.sizes.map((size: string) => (
-                        <button key={size} className="min-w-[2.5rem] px-3 h-10 rounded-none border border-bottle/20 flex items-center justify-center text-sm font-medium text-bottle focus:bg-bottle focus:text-white transition-colors">
+                        <button 
+                          key={size} 
+                          onClick={() => setSelectedSize(size)}
+                          className={`min-w-[2.5rem] px-3 h-10 rounded-none border flex items-center justify-center text-sm font-medium transition-colors ${
+                            selectedSize === size 
+                              ? 'bg-bottle text-white border-bottle' 
+                              : 'bg-transparent text-bottle border-bottle/20'
+                          }`}
+                        >
                           {size}
                         </button>
                       ))}
@@ -191,9 +218,14 @@ function ProductCard({ product, onSelect }: { product: any, onSelect: () => void
 
                 {/* Кнопки мобілка */}
                 <div className="flex items-center gap-2 mt-4 pt-4 border-t border-bottle/10">
-                  <Button className="flex-1 bg-bottle text-milky h-12 rounded-none uppercase tracking-widest text-xs font-bold">
-                    Купити зараз
-                  </Button>
+                  <SheetClose asChild>
+                    <Button 
+                      onClick={() => handleAddToCart()}
+                      className="flex-1 bg-bottle text-milky h-12 rounded-none uppercase tracking-widest text-xs font-bold"
+                    >
+                      В кошик
+                    </Button>
+                  </SheetClose>
                 </div>
               </div>
             </SheetContent>
@@ -220,15 +252,26 @@ function ProductCard({ product, onSelect }: { product: any, onSelect: () => void
           )}
         </div>
         
-        {/* ДЕСКТОПНЕ ХОВЕР-МЕНЮ (Приховане на мобілці) */}
-        <div className="absolute top-1/2 left-0 w-full bg-white border border-t-0 border-bottle/10 p-5 opacity-0 pointer-events-none md:group-hover:opacity-100 md:group-hover:pointer-events-auto translate-y-[-10px] md:group-hover:translate-y-0 transition-all duration-300 shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1)] z-20 flex-col gap-4 hidden md:flex">
+        {/* ДЕСКТОПНЕ ХОВЕР-МЕНЮ */}
+        <div 
+          className="absolute top-1/2 left-0 w-full bg-white border border-t-0 border-bottle/10 p-5 opacity-0 pointer-events-none md:group-hover:opacity-100 md:group-hover:pointer-events-auto translate-y-[-10px] md:group-hover:translate-y-0 transition-all duration-300 shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1)] z-20 flex-col gap-4 hidden md:flex"
+          onClick={(e) => e.stopPropagation()}
+        >
           
           {product.sizes && product.sizes.length > 0 && (
             <div>
               <p className="text-[10px] text-bottle/60 mb-2 uppercase tracking-widest font-bold">Розмір</p>
               <div className="flex gap-2 flex-wrap">
                 {product.sizes.map((size: string) => (
-                  <button key={size} className="min-w-[2rem] px-2 h-8 border border-bottle/10 flex items-center justify-center text-xs font-medium text-bottle hover:border-bottle hover:bg-bottle focus:bg-bottle focus:text-white transition-colors">
+                  <button 
+                    key={size} 
+                    onClick={(e) => { e.stopPropagation(); setSelectedSize(size); }}
+                    className={`min-w-[2rem] px-2 h-8 border flex items-center justify-center text-xs font-medium transition-colors ${
+                      selectedSize === size 
+                        ? 'bg-bottle text-white border-bottle' 
+                        : 'bg-transparent text-bottle border-bottle/10 hover:border-bottle'
+                    }`}
+                  >
                     {size}
                   </button>
                 ))}
@@ -244,15 +287,29 @@ function ProductCard({ product, onSelect }: { product: any, onSelect: () => void
           )}
 
           <div className="flex items-center gap-2 mt-2">
-            <Button className="flex-1 bg-bottle text-milky hover:bg-bottle/90 h-10 rounded-none uppercase tracking-[0.2em] text-[10px] font-bold">
+            <Button 
+              onClick={handleAddToCart}
+              className="flex-1 bg-bottle text-milky hover:bg-bottle/90 h-10 rounded-none uppercase tracking-[0.2em] text-[10px] font-bold"
+            >
               В кошик
             </Button>
-            <Button variant="outline" size="icon" className="h-10 w-10 border-bottle/20 text-bottle hover:bg-red-50 hover:text-red-500 hover:border-red-200 rounded-none flex-shrink-0 transition-colors">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="h-10 w-10 border-bottle/20 text-bottle hover:bg-red-50 hover:text-red-500 hover:border-red-200 rounded-none flex-shrink-0 transition-colors"
+              onClick={(e) => e.stopPropagation()}
+            >
               <Heart className="w-4 h-4" />
             </Button>
           </div>
         </div>
       </div>
+
+      {showToast && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-bottle text-white text-[10px] px-4 py-2 rounded-full shadow-2xl z-50 animate-in slide-in-from-top fade-in flex items-center gap-2 whitespace-nowrap border border-white/20 font-medium">
+          {showToast}
+        </div>
+      )}
     </div>
   );
 }

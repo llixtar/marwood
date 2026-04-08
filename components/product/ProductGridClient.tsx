@@ -121,7 +121,7 @@ export function ProductGridClient({ products }: ProductGridClientProps) {
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-bottle/50 text-[10px] font-mono">Від</span>
             <input 
               type="number" 
-              className="w-full text-xs border border-bottle/20 py-2 pl-9 pr-3 text-bottle focus:outline-none focus:border-bottle transition-colors"
+              className="w-full text-[16px] lg:text-xs border border-bottle/20 py-2 pl-9 pr-3 text-bottle focus:outline-none focus:border-bottle transition-colors"
               value={Number(minPrice).toString()} 
               onChange={(e) => setMinPrice(Math.max(minProductPrice, Math.min(maxPrice, Number(e.target.value))))}
             />
@@ -131,7 +131,7 @@ export function ProductGridClient({ products }: ProductGridClientProps) {
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-bottle/50 text-[10px] font-mono">До</span>
             <input 
               type="number" 
-              className="w-full text-xs border border-bottle/20 py-2 pl-9 pr-3 text-bottle focus:outline-none focus:border-bottle transition-colors"
+              className="w-full text-[16px] lg:text-xs border border-bottle/20 py-2 pl-9 pr-3 text-bottle focus:outline-none focus:border-bottle transition-colors"
               value={Number(maxPrice).toString()} 
               onChange={(e) => setMaxPrice(Math.max(minPrice, Math.min(maxProductPrice, Number(e.target.value))))}
             />
@@ -346,7 +346,11 @@ export function ProductGridClient({ products }: ProductGridClientProps) {
 
       {/* Мобільні фільтри Sheet */}
       <Sheet open={isMobileFiltersOpen} onOpenChange={setIsMobileFiltersOpen}>
-        <SheetContent side="left" className="w-[85vw] sm:w-[400px] p-6 bg-white overflow-y-auto border-none shadow-2xl z-[150]">
+        <SheetContent 
+          side="left" 
+          className="w-[85vw] sm:w-[400px] p-6 bg-white overflow-y-auto border-none shadow-2xl z-[150]"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <SheetHeader className="mb-6 border-b border-bottle/10 pb-4 text-left">
             <SheetTitle className="text-lg font-light uppercase tracking-widest text-bottle">Фільтри</SheetTitle>
           </SheetHeader>
