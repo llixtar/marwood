@@ -17,6 +17,8 @@ export type CustomerProfile = {
   orders_count: number;
   total_spent: number;
   is_guest: boolean;
+  cart_data: any;
+  wishlist_data: any;
 };
 
 export async function getCustomerProfile(authUserId: string): Promise<CustomerProfile | null> {
@@ -42,6 +44,28 @@ export async function updateCustomerProfile(
     .eq('auth_user_id', authUserId);
 
   if (error) {
+    return { success: false, error: error.message };
+  }
+  return { success: true };
+}
+
+export async function syncCustomerData(
+  authUserId: string,
+  type: 'cart' | 'wishlist',
+  data: any
+) {
+  const column = type === 'cart' ? 'cart_data' : 'wishlist_data';
+  
+  const { error } = await supabaseAdmin
+    .from('customer_profiles')
+    .update({
+      [column]: data,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('auth_user_id', authUserId);
+
+  if (error) {
+    console.error(`Failed to sync ${type}:`, error);
     return { success: false, error: error.message };
   }
   return { success: true };

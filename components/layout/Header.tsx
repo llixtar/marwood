@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { Menu, Heart, ChevronDown, LayoutGrid } from 'lucide-react';
+import { Menu, ChevronDown, LayoutGrid } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { GlobalSearch } from './GlobalSearch';
 import { CartButton } from '@/components/cart/CartButton';
+import { WishlistButton } from '@/components/wishlist/WishlistButton';
 import { AuthButton } from '@/components/auth/AuthProvider';
 import {
   Sheet,
@@ -30,10 +31,10 @@ export function Header() {
     // Змінили z-[100] на z-40, щоб бургер (z-50) міг відкритися ПОВЕРХ хедера
     <header className="sticky top-0 z-40 w-full border-b border-bottle/10 bg-background/95 backdrop-blur">
       <div className="container mx-auto px-4 flex h-16 items-center justify-between">
-        
+
         {/* --- ЛІВА ЧАСТИНА (Десктоп: Навігація | Мобілка: Бургер) --- */}
-        <div className="flex-1 flex items-center justify-start">
-          
+        <div className="flex-none md:flex-1 flex items-center justify-start">
+
           {/* Мобільний бургер */}
           <div className="md:hidden">
             <Sheet>
@@ -47,9 +48,9 @@ export function Header() {
                   <SheetTitle>Меню навігації</SheetTitle>
                   <SheetDescription>Навігація по категоріям</SheetDescription>
                 </SheetHeader>
-                
+
                 <nav className="flex flex-col gap-2 mt-8 pl-6">
-                  
+
                   {/* КАТАЛОГ (Мобільний випадаючий список) */}
                   <details className="group py-2">
                     <summary className="flex cursor-pointer list-none items-center gap-2 text-xl font-medium text-bottle [&::-webkit-details-marker]:hidden">
@@ -71,7 +72,7 @@ export function Header() {
                   {/* АКЦІЇ */}
                   <div className="py-2">
                     <SheetClose asChild>
-                      <Link href="/sale" className="text-xl font-medium text-red-600 hover:opacity-60 transition-opacity">
+                      <Link href="/#sale" className="text-xl font-heading font-medium text-bottle hover:opacity-60 transition-opacity uppercase tracking-widest">
                         Акції
                       </Link>
                     </SheetClose>
@@ -99,16 +100,16 @@ export function Header() {
           <div className="hidden md:flex">
             <NavigationMenu>
               <NavigationMenuList>
-                
+
                 <NavigationMenuItem>
                   {/* Блокуємо hover-події, щоб меню відкривалося ТІЛЬКИ по кліку */}
-                  <NavigationMenuTrigger 
+                  <NavigationMenuTrigger
                     onPointerEnter={(e) => e.preventDefault()}
                     onPointerLeave={(e) => e.preventDefault()}
                     className="!bg-bottle !text-white hover:!bg-bottle/90 data-[state=open]:!bg-bottle/90 rounded-full px-5 py-2.5 h-auto flex items-center gap-2 group transition-all"
                   >
                     <LayoutGrid className="w-4 h-4 opacity-80" />
-                    <span className="font-semibold tracking-wide">Каталог</span>
+                    <span className="font-heading font-bold uppercase text-[10px] tracking-[0.2em]">Каталог</span>
                   </NavigationMenuTrigger>
                   <NavigationMenuContent
                     onPointerEnter={(e) => e.preventDefault()}
@@ -126,19 +127,19 @@ export function Header() {
                     </ul>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
-                
+
                 <NavigationMenuItem>
-                  <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                    <Link href="/sale" className="text-red-600 font-medium bg-transparent hover:bg-bottle/5">Акції</Link>
+                  <NavigationMenuLink asChild className={`${navigationMenuTriggerStyle()} !bg-transparent !text-bottle hover:!bg-bottle/5 font-heading font-bold uppercase text-[10px] tracking-[0.2em]`}>
+                    <Link href="/#sale">Акції</Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
                   {/* Блокуємо hover-події, щоб меню відкривалося ТІЛЬКИ по кліку */}
-                  <NavigationMenuTrigger 
+                  <NavigationMenuTrigger
                     onPointerEnter={(e) => e.preventDefault()}
                     onPointerLeave={(e) => e.preventDefault()}
-                    className="bg-transparent text-bottle hover:bg-bottle/5"
+                    className="bg-transparent text-bottle hover:bg-bottle/5 font-heading font-bold uppercase text-[10px] tracking-[0.2em]"
                   >
                     Інформація
                   </NavigationMenuTrigger>
@@ -160,8 +161,8 @@ export function Header() {
         </div>
 
         {/* --- ЦЕНТР (Логотип) --- */}
-        <div className="flex-1 flex justify-center">
-          <Link href="/" className="text-2xl md:text-3xl font-bold uppercase tracking-[0.3em] text-bottle">
+        <div className="flex-1 flex justify-start md:justify-center ml-2 md:ml-0">
+          <Link href="/" className="text-base md:text-3xl font-heading font-bold uppercase tracking-widest md:tracking-[0.3em] text-bottle transition-all">
             Marwood
           </Link>
         </div>
@@ -170,10 +171,8 @@ export function Header() {
         <div className="flex-1 flex items-center justify-end gap-1 md:gap-4">
           <GlobalSearch />
 
-          <Button variant="ghost" size="icon" className="text-bottle hover:bg-bottle/5 hidden sm:flex">
-            <Heart className="h-5 w-5" />
-          </Button>
-          
+          <WishlistButton />
+
           <AuthButton />
 
           <CartButton />

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { AuthModal } from './AuthModal';
 import { UserMenu } from './UserMenu';
+import { SyncManager } from './SyncManager';
 import { User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -26,6 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <SyncManager />
       {children}
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </>

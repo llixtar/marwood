@@ -2,16 +2,35 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useCartStore } from '@/lib/store/cartStore';
-import { ShoppingBag, Minus, Plus, Trash2, ShieldCheck, Truck, CreditCard } from 'lucide-react';
+import { ShoppingBag, Minus, Plus, Trash2, ShieldCheck, Truck, CreditCard, X } from 'lucide-react';
 
 export function OrderSummary() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
-  const { items, totalPrice, totalItems, removeItem, updateQty } = useCartStore();
+  const { items, removeItem, updateQty } = useCartStore();
+
+  const buyNow = searchParams.get('buyNow') === 'true';
+  const buyNowId = searchParams.get('id');
+  const buyNowSize = searchParams.get('size');
+
+  // Визначаємо товари для відображення
+  const displayedItems = buyNow 
+    ? items.filter(i => String(i.id) === buyNowId && (buyNowSize ? i.selectedSize === buyNowSize : !i.selectedSize))
+    : items;
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Якщо товарів немає — повертаємо на головну
+  useEffect(() => {
+    if (mounted && displayedItems.length === 0) {
+      router.push('/');
+    }
+  }, [mounted, displayedItems.length, router]);
 
   if (!mounted) {
     return (
@@ -25,8 +44,8 @@ export function OrderSummary() {
     );
   }
 
-  const total = totalPrice();
-  const count = totalItems();
+  const total = displayedItems.reduce((sum, i) => sum + (i.discount_price ?? i.price) * i.quantity, 0);
+  const count = displayedItems.reduce((sum, i) => sum + i.quantity, 0);
   const freeShippingThreshold = 2000;
   const shippingCost = total >= freeShippingThreshold ? 0 : 70;
   const finalTotal = total + shippingCost;
@@ -47,25 +66,24 @@ export function OrderSummary() {
       </div>
 
       {/* Товари */}
-      <div className="max-h-[400px] overflow-y-auto">
-        {items.map((item) => {
+      <div className="max-h-[500px] overflow-y-auto">
+        {displayedItems.map((item) => {
           const effectivePrice = item.discount_price ?? item.price;
           return (
             <div
               key={`${item.id}-${item.selectedSize ?? ''}`}
-              className="px-6 py-4 flex gap-3 border-b border-bottle/5 last:border-0"
+              className="px-6 py-5 flex gap-4 border-b border-bottle/5 last:border-0 relative group"
             >
               {/* Фото */}
-              <div className="relative w-14 h-20 flex-shrink-0 bg-bottle/5 overflow-hidden">
+              <div className="relative w-16 h-24 flex-shrink-0 bg-bottle/5 overflow-hidden">
                 {item.image ? (
                   <Image src={item.image} alt={item.title} fill className="object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <ShoppingBag className="w-4 h-4 text-bottle/20" />
+                    <ShoppingBag className="w-5 h-5 text-bottle/20" />
                   </div>
                 )}
               </div>
-
               {/* Деталі */}
               <div className="flex-1 min-w-0 flex flex-col justify-between">
                 <div>
@@ -95,22 +113,37 @@ export function OrderSummary() {
                   <div className="flex items-center border border-bottle/10">
                     <button
                       onClick={() => updateQty(item.id, item.selectedSize, -1)}
-                      className="w-6 h-6 flex items-center justify-center text-bottle/50 hover:bg-bottle hover:text-white transition-colors"
+                      className="w-7 h-7 flex items-center justify-center text-bottle/50 hover:bg-bottle hover:text-white transition-colors"
                     >
-                      <Minus className="w-2.5 h-2.5" />
+                      <Minus className="w-3 h-3" />
                     </button>
-                    <span className="w-6 h-6 flex items-center justify-center text-[10px] font-bold text-bottle border-x border-bottle/10">
+                    <span className="w-7 h-7 flex items-center justify-center text-[10px] font-bold text-bottle border-x border-bottle/10">
                       {item.quantity}
                     </span>
                     <button
                       onClick={() => updateQty(item.id, item.selectedSize, 1)}
-                      className="w-6 h-6 flex items-center justify-center text-bottle/50 hover:bg-bottle hover:text-white transition-colors"
+                      className="w-7 h-7 flex items-center justify-center text-bottle/50 hover:bg-bottle hover:text-white transition-colors"
                     >
-                      <Plus className="w-2.5 h-2.5" />
+                      <Plus className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
               </div>
+
+              {/* Видалити */}
+              <button
+                onClick={() => {
+                  if (buyNow) {
+                    router.push('/');
+                  } else {
+                    removeItem(item.id, item.selectedSize);
+                  }
+                }}
+                className="absolute top-4 right-4 p-2 text-bottle/20 hover:text-red-500 hover:bg-red-50 rounded-full transition-all opacity-0 group-hover:opacity-100"
+                title="Видалити"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
             </div>
           );
         })}

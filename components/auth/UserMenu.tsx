@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/store/authStore';
+import { useCartStore } from '@/lib/store/cartStore';
+import { useWishlistStore } from '@/lib/store/wishlistStore';
 import { User, Package, Settings, LogOut, ChevronDown } from 'lucide-react';
 
 export function UserMenu() {
@@ -25,8 +27,13 @@ export function UserMenu() {
   const displayName = profile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Користувач';
   const initials = displayName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
 
+  const { clearCart } = useCartStore();
+  const { clearWishlist } = useWishlistStore();
+
   const handleSignOut = async () => {
     await signOut();
+    clearCart();
+    clearWishlist();
     setIsOpen(false);
     window.location.href = '/';
   };

@@ -238,7 +238,7 @@ export function NovaPoshtaWarehouseSelect({ cityRef, cityName, onWarehouseSelect
 
     setLoading(true);
     npFetch('Address', 'getWarehouses', {
-      CityRef: cityRef,
+      SettlementRef: cityRef,
       Limit: 500,
     }).then((data) => {
       if (data.length === 0) {

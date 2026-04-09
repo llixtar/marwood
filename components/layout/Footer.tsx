@@ -51,9 +51,6 @@ export function Footer() {
             <Link href="/admin" className="text-3xl font-bold uppercase tracking-[0.3em]" title="Доступ до адмін-панелі">
               Marwood
             </Link>
-            <p className="text-sm opacity-80 leading-relaxed max-w-[280px]">
-              Ексклюзивна жіноча білизна, що підкреслює твою унікальність. Відчуй преміальну якість у кожному дотику.
-            </p>
             <div className="flex items-center gap-4 mt-2">
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:opacity-60 transition-opacity">
                 <InstagramIcon className="w-6 h-6" />
@@ -64,16 +61,33 @@ export function Footer() {
             </div>
           </div>
 
+          {/* Блок 2: Графік роботи */}
+          <div className="flex flex-col gap-4">
+            <h4 className="text-sm font-semibold uppercase tracking-widest mb-2">Графік роботи</h4>
+            <div className="space-y-2 opacity-80 text-sm">
+              <div className="flex justify-between max-w-[150px]">
+                <span>Пн - Пт:</span>
+                <span>10:00 - 20:00</span>
+              </div>
+              <div className="flex justify-between max-w-[150px]">
+                <span>Сб - Нд:</span>
+                <span>11:00 - 18:00</span>
+              </div>
+              <p className="text-[10px] mt-2 opacity-60">* Прийом замовлень онлайн — 24/7</p>
+            </div>
+          </div>
+
 
           {/* Блок 3: Клієнтам */}
           <div className="flex flex-col gap-4">
             <h4 className="text-sm font-semibold uppercase tracking-widest mb-2">Клієнтам</h4>
             <div className="flex flex-col gap-3">
-              {['Оплата і доставка', 'Обмін та повернення', 'Відгуки', 'Таблиця розмірів'].map((item) => (
-                <Link key={item} href="/info" className="text-sm opacity-70 hover:opacity-100 hover:translate-x-1 transition-all">
-                  {item}
-                </Link>
-              ))}
+              <Link href="/delivery" className="text-sm opacity-70 hover:opacity-100 hover:translate-x-1 transition-all">
+                Оплата та доставка
+              </Link>
+              <Link href="/returns" className="text-sm opacity-70 hover:opacity-100 hover:translate-x-1 transition-all">
+                Обмін та повернення
+              </Link>
             </div>
           </div>
 

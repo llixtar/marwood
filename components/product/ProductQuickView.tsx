@@ -2,10 +2,13 @@
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import Image from 'next/image';
-import { ShoppingCart, Heart, ShieldCheck, Ruler, Truck, ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react';
+import { ShoppingCart, Heart, ShieldCheck, Ruler, Truck, ChevronLeft, ChevronRight, Maximize2, X, ArrowRight } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { useCartStore } from '@/lib/store/cartStore';
+import { useWishlistStore } from '@/lib/store/wishlistStore';
+import { useAuthStore } from '@/lib/store/authStore';
 
 type ProductQuickViewProps = {
   product: any;
@@ -14,6 +17,7 @@ type ProductQuickViewProps = {
 };
 
 export function ProductQuickView({ product: initialProduct, isOpen, onClose }: ProductQuickViewProps) {
+  const router = useRouter();
   const [currentProduct, setCurrentProduct] = useState<any>(initialProduct);
   const [variants, setVariants] = useState<any[]>([]);
 
@@ -22,19 +26,47 @@ export function ProductQuickView({ product: initialProduct, isOpen, onClose }: P
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [showToast, setShowToast] = useState('');
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const touchStartX = useRef<number | null>(null);
 
   // Скидаємо стейти при відкритті нового товару або зміні props
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && initialProduct) {
       setCurrentProduct(initialProduct);
       setCurrentImageIndex(0);
-      setSelectedSize('');
+      setSelectedSize(initialProduct.selectedSize || '');
       setShowToast('');
       setIsLightboxOpen(false);
+      
+      // Завантажуємо повні дані про товар
+      const fetchFullProduct = async () => {
+        setIsLoading(true);
+        try {
+          const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .eq('id', initialProduct.id)
+            .single();
+          
+          if (data && !error) {
+            setCurrentProduct(data);
+          }
+        } catch (err) {
+          console.error('Error fetching full product:', err);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchFullProduct();
     }
-  }, [isOpen, initialProduct]);
+  }, [isOpen, initialProduct?.id]);
 
   // Завантаження варіантів (товарів з таким же артикулом)
   useEffect(() => {
@@ -55,7 +87,9 @@ export function ProductQuickView({ product: initialProduct, isOpen, onClose }: P
     }
   }, [isOpen, product?.sku]);
 
-  const { addItem, openCart } = useCartStore();
+  const { addItem, openCart, items } = useCartStore();
+  const { toggleItem, isInWishlist } = useWishlistStore();
+  const { user } = useAuthStore();
 
   if (!product) return null;
 
@@ -73,6 +107,7 @@ export function ProductQuickView({ product: initialProduct, isOpen, onClose }: P
       discount_price: product.discount_price,
       image: product.images?.[0],
       selectedSize: selectedSize || undefined,
+      sku: product.sku,
     });
 
     setShowToast('Товар додано до кошика! 🛍️');
@@ -82,10 +117,59 @@ export function ProductQuickView({ product: initialProduct, isOpen, onClose }: P
       openCart();
     }, 800);
   };
+  
+  const handleGoToCheckout = () => {
+    // Якщо товару ще немає в кошику — додаємо
+    if (!isInCart) {
+      if (product.sizes?.length > 0 && !selectedSize) {
+        setShowToast('Будь ласка, оберіть розмір!');
+        setTimeout(() => setShowToast(''), 3000);
+        return;
+      }
+      
+      addItem({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        discount_price: product.discount_price,
+        image: product.images?.[0],
+        selectedSize: selectedSize || undefined,
+        sku: product.sku,
+      });
+    }
 
-  const handleAddLike = () => {
-    setShowToast('Товар збережено в улюблені! ❤️');
-    setTimeout(() => setShowToast(''), 3000);
+    onClose();
+    const sizeParam = selectedSize ? `&size=${encodeURIComponent(selectedSize)}` : '';
+    router.push(`/checkout?buyNow=true&id=${product.id}${sizeParam}`);
+  };
+
+  const isInCart = mounted && items.some(i => 
+    i.id === product.id && 
+    (selectedSize ? i.selectedSize === selectedSize : !i.selectedSize)
+  );
+
+  const handleToggleWishlist = () => {
+    if (!user) {
+      (window as any).dispatchOpenAuth?.();
+      return;
+    }
+
+    toggleItem({
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      discount_price: product.discount_price,
+      images: product.images,
+      color: product.color,
+      sizes: product.sizes,
+      sku: product.sku,
+      description: product.description,
+    });
+    const msg = isInWishlist(product.id)
+      ? 'Додано до вибраного! ❤️'
+      : 'Видалено з вибраного';
+    setShowToast(msg);
+    setTimeout(() => setShowToast(''), 2000);
   };
 
   return (
@@ -121,14 +205,6 @@ export function ProductQuickView({ product: initialProduct, isOpen, onClose }: P
                   priority
                   onClick={() => setIsLightboxOpen(true)}
                 />
-
-                {/* Іконка збільшення */}
-                <button 
-                  onClick={() => setIsLightboxOpen(true)}
-                  className="absolute top-4 right-4 bg-white/80 p-2 text-bottle hover:bg-white transition-colors z-20 opacity-0 group-hover:opacity-100"
-                >
-                  <Maximize2 className="w-4 h-4" />
-                </button>
                 
                 {/* Навігація по фотострілками */}
                 {product.images.length > 1 && (
@@ -178,7 +254,13 @@ export function ProductQuickView({ product: initialProduct, isOpen, onClose }: P
           </div>
 
           {/* Інформація про товар */}
-          <div className="p-6 md:p-8 flex flex-col gap-6 relative">
+          <div className={`p-6 md:p-8 flex flex-col gap-6 relative transition-opacity duration-300 ${isLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+            
+            {isLoading && (
+              <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 backdrop-blur-[2px]">
+                <div className="w-8 h-8 border-2 border-bottle/20 border-t-bottle rounded-full animate-spin" />
+              </div>
+            )}
             
             <div className="flex flex-col gap-2">
               <span className="text-[10px] text-bottle/40 uppercase tracking-widest font-mono">
@@ -295,19 +377,32 @@ export function ProductQuickView({ product: initialProduct, isOpen, onClose }: P
         {/* Фіксований Футер з кнопками */}
         <div className="border-t border-bottle/10 p-4 bg-white flex gap-3 z-30 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
           <button 
-            onClick={handleAddLike}
-            className="w-14 h-14 flex items-center justify-center border border-bottle/20 text-bottle hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors flex-shrink-0"
-            title="В улюблені"
+            onClick={handleToggleWishlist}
+            className={`w-14 h-14 flex items-center justify-center border transition-colors flex-shrink-0 ${
+              mounted && isInWishlist(product.id)
+                ? 'border-red-300 bg-red-50 text-red-500 hover:bg-red-100'
+                : 'border-bottle/20 text-bottle hover:bg-red-50 hover:text-red-500 hover:border-red-200'
+            }`}
+            title={mounted && isInWishlist(product.id) ? 'Видалити з вибраного' : 'Додати до вибраного'}
           >
-            <Heart className="w-5 h-5" />
+            <Heart className={`w-5 h-5 transition-all ${mounted && isInWishlist(product.id) ? 'fill-red-500' : ''}`} />
           </button>
 
-          <button 
-            onClick={handleAddToCart}
-            className="flex-1 bg-bottle text-milky hover:bg-bottle/90 uppercase tracking-[0.2em] text-xs font-bold transition-colors flex items-center justify-center gap-2"
-          >
-            <ShoppingCart className="w-4 h-4" /> Додати до кошика
-          </button>
+          {isInCart ? (
+            <button 
+              onClick={handleGoToCheckout}
+              className="flex-1 bg-bottle text-milky hover:bg-bottle/90 uppercase tracking-[0.2em] text-xs font-bold transition-colors flex items-center justify-center gap-3 px-6 shadow-lg shadow-bottle/20"
+            >
+              Оформити замовлення <ArrowRight className="w-4 h-4" />
+            </button>
+          ) : (
+            <button 
+              onClick={handleAddToCart}
+              className="flex-1 bg-bottle text-milky hover:bg-bottle/90 uppercase tracking-[0.2em] text-xs font-bold transition-colors flex items-center justify-center gap-3 px-6"
+            >
+              <ShoppingCart className="w-4 h-4 ml-1" /> Додати до кошика
+            </button>
+          )}
         </div>
 
         {/* Спливаюче Toast (Дуже кастомне і просте) */}

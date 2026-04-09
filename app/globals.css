@@ -10,6 +10,11 @@
   --color-milky: #fcf9ec;
   --color-marwood-black: #0a0a0a;
 
+  --font-inter: var(--font-inter);
+  --font-montserrat: var(--font-montserrat);
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-montserrat);
+
   /* Прив'язуємо системні кольори до фірмових */
   --color-background: var(--background);
   --color-foreground: var(--foreground);

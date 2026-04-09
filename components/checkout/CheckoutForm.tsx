@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useCartStore } from '@/lib/store/cartStore';
 import { useAuthStore } from '@/lib/store/authStore';
 import { createOrderAction } from '@/app/actions/orders';
@@ -16,9 +16,19 @@ type PaymentMethod = 'monopay' | 'cod';
 
 export function CheckoutForm() {
   const router = useRouter();
-  const { items, totalPrice, clearCart } = useCartStore();
+  const searchParams = useSearchParams();
+  const { items, clearCart, removeItem } = useCartStore();
   const { user, profile } = useAuthStore();
   const [mounted, setMounted] = useState(false);
+
+  const buyNow = searchParams.get('buyNow') === 'true';
+  const buyNowId = searchParams.get('id');
+  const buyNowSize = searchParams.get('size');
+
+  // Визначаємо товари для замовлення
+  const orderItems = buyNow 
+    ? items.filter(i => String(i.id) === buyNowId && (buyNowSize ? i.selectedSize === buyNowSize : !i.selectedSize))
+    : items;
 
   // Form state
   const [name, setName] = useState('');
@@ -67,7 +77,7 @@ export function CheckoutForm() {
 
   if (!mounted) return null;
 
-  const total = totalPrice();
+  const total = orderItems.reduce((sum, i) => sum + (i.discount_price ?? i.price) * i.quantity, 0);
   const codPrepaymentThreshold = 500;
   const codPrepaymentRequired = paymentMethod === 'cod' && total > codPrepaymentThreshold;
 
@@ -113,7 +123,7 @@ export function CheckoutForm() {
 
   const handleSubmit = async () => {
     if (!validateStep2()) return;
-    if (items.length === 0) {
+    if (orderItems.length === 0) {
       setError('Кошик порожній');
       return;
     }
@@ -134,11 +144,16 @@ export function CheckoutForm() {
         address: deliveryMethod === 'nova_poshta_courier' ? address : undefined,
         paymentMethod,
         comment: comment || undefined,
-        items,
+        items: orderItems,
       });
 
       if (result.success) {
-        clearCart();
+        if (buyNow) {
+          // Якщо це швидке замовлення — видаляємо тільки цей товар з кошика
+          orderItems.forEach(i => removeItem(i.id, i.selectedSize));
+        } else {
+          clearCart();
+        }
 
         if (result.paymentUrl) {
           // Redirect to MonoPay
@@ -355,7 +370,7 @@ export function CheckoutForm() {
                   style={{ fontSize: '16px' }}
                 />
                 <p className="text-[10px] text-bottle/40 -mt-1">
-                  Наприклад: вул. Степана Бандери, 25, кв. 12
+                  Наприклад: вул. Соборна, 25, кв. 12
                 </p>
               </div>
             )

@@ -28,8 +28,8 @@ const bottomCategories = [
 
 export function CatalogGallery() {
   // Налаштовуємо таймери для каруселей: не зупиняти повністю після свайпу, але паузнути при наведенні або взаємодії
-  const pluginTop = React.useRef(Autoplay({ delay: 3000, stopOnInteraction: false }));
-  const pluginBottom = React.useRef(Autoplay({ delay: 4000, stopOnInteraction: false }));
+  const pluginTop = React.useRef(Autoplay({ delay: 5000, stopOnInteraction: false }));
+  const pluginBottom = React.useRef(Autoplay({ delay: 6500, stopOnInteraction: false }));
 
   return (
     <section className="w-full py-12 px-4">
@@ -114,11 +114,11 @@ function CategoryCard({ category }: { category: { title: string, link: string, i
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
 
       {/* Текст */}
-      <div className="absolute bottom-6 left-6 text-white">
-        <h3 className="text-2xl uppercase tracking-widest font-light drop-shadow-md">
+      <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 text-white max-w-[80%]">
+        <h3 className="text-sm md:text-2xl uppercase tracking-widest font-light drop-shadow-md leading-tight">
           {category.title}
         </h3>
-        <span className="text-[10px] uppercase tracking-[0.3em] font-bold mt-2 inline-block border-b border-white/50 pb-1 group-hover:border-white transition-colors">
+        <span className="text-[8px] md:text-[10px] uppercase tracking-[0.3em] font-medium mt-2 inline-block border-b border-white/50 pb-1 group-hover:border-white transition-colors">
           Дивитись ➔
         </span>
       </div>

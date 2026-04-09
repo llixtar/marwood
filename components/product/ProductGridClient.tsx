@@ -3,15 +3,25 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { ProductQuickView } from './ProductQuickView';
-import { SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { SlidersHorizontal, ChevronDown, Heart } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { useWishlistStore } from '@/lib/store/wishlistStore';
+import { useAuthStore } from '@/lib/store/authStore';
+import { useQuickViewStore } from '@/lib/store/quickViewStore';
 
 type ProductGridClientProps = {
   products: any[];
 };
 
 export function ProductGridClient({ products }: ProductGridClientProps) {
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const { toggleItem, isInWishlist } = useWishlistStore();
+  const { user } = useAuthStore();
+  const { openQuickView } = useQuickViewStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   // Фільтри
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
@@ -278,7 +288,7 @@ export function ProductGridClient({ products }: ProductGridClientProps) {
                 <div 
                   key={product.id} 
                   className="group flex flex-col cursor-pointer"
-                  onClick={() => setSelectedProduct(product)}
+                  onClick={() => openQuickView(product)}
                 >
                   <div className="relative w-full aspect-[3/4] overflow-hidden bg-bottle/5 mb-3">
                     {product.images && product.images.length > 0 ? (
@@ -315,6 +325,41 @@ export function ProductGridClient({ products }: ProductGridClientProps) {
                         ))}
                       </div>
                     )}
+                    {/* Кнопка вибраного */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        
+                        // Перевірка авторизації
+                        if (!user) {
+                          (window as any).dispatchOpenAuth?.();
+                          return;
+                        }
+
+                        toggleItem({
+                          id: product.id,
+                          title: product.title,
+                          price: product.price,
+                          discount_price: product.discount_price,
+                          images: product.images,
+                          color: product.color,
+                          sizes: product.sizes,
+                          sku: product.sku,
+                          description: product.description,
+                        });
+                      }}
+                      className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 bg-white/80 hover:bg-white shadow-sm hover:shadow-md"
+                      title={mounted && isInWishlist(product.id) ? 'Видалити з вибраного' : 'Додати до вибраного'}
+                    >
+                      <Heart
+                        className={`w-4 h-4 transition-all duration-200 ${
+                          mounted && isInWishlist(product.id)
+                            ? 'fill-red-500 text-red-500 scale-110'
+                            : 'text-bottle/50 fill-transparent'
+                        }`}
+                      />
+                    </button>
+
                   </div>
 
                   <div className="flex flex-col items-center z-10 px-2 text-center pb-4">
@@ -381,11 +426,6 @@ export function ProductGridClient({ products }: ProductGridClientProps) {
         </SheetContent>
       </Sheet>
 
-      <ProductQuickView 
-        product={selectedProduct} 
-        isOpen={!!selectedProduct} 
-        onClose={() => setSelectedProduct(null)} 
-      />
     </div>
   );
 }

@@ -11,10 +11,13 @@ export async function signUpAction(formData: {
 }) {
   const supabase = await createSupabaseServer();
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://marwood.vercel.app';
+
   const { data, error } = await supabase.auth.signUp({
     email: formData.email,
     password: formData.password,
     options: {
+      emailRedirectTo: `${appUrl}/api/auth/callback`,
       data: {
         full_name: formData.fullName,
         phone: formData.phone || '',
@@ -66,29 +69,6 @@ export async function signInAction(formData: {
   }
 
   return { success: true };
-}
-
-export async function signInWithGoogleAction() {
-  const supabase = await createSupabaseServer();
-  
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: `${appUrl}/api/auth/callback`,
-    },
-  });
-
-  if (error) {
-    return { success: false, error: error.message };
-  }
-
-  if (data.url) {
-    redirect(data.url);
-  }
-
-  return { success: false, error: 'Не вдалось отримати URL для авторизації' };
 }
 
 export async function signOutAction() {
