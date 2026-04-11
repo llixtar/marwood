@@ -26,6 +26,10 @@ type ManagedImage = {
   isExisting: boolean;
 };
 
+type ProductFormProps = {
+  initialData?: any;
+};
+
 export function ProductForm({ initialData }: ProductFormProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
