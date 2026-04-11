@@ -4,6 +4,7 @@
 CREATE TABLE IF NOT EXISTS orders (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   order_number TEXT UNIQUE NOT NULL,
+  customer_id UUID REFERENCES customer_profiles(id), -- Прив'язка до профілю (може бути NULL для старих замовлень)
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled')),
   
   -- Контактні дані
@@ -40,6 +41,7 @@ CREATE INDEX IF NOT EXISTS idx_orders_order_number ON orders(order_number);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_mono_invoice ON orders(mono_invoice_id);
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);
 
 -- RLS (Row Level Security) — поки вимкнено для спрощення
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;

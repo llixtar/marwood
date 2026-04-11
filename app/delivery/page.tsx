@@ -24,7 +24,7 @@ export default function DeliveryPage() {
             </div>
             
             <div className="space-y-6 text-bottle/80 leading-relaxed">
-              <p>Ми здійснюємо доставку по всій території України, де працюють відділення <strong>Нової Пошти</strong>.</p>
+              <p>Ми здійснюємо доставку по всій території України, а також в інші країни, де є відділення <strong>Нової Пошти</strong>.</p>
               
               <ul className="list-none space-y-4">
                 <li className="flex gap-4">

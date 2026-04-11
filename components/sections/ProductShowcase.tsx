@@ -46,8 +46,19 @@ export function ProductShowcase({ hitsProducts, newProducts, saleProducts }: Sho
 
     handleHashChange();
     window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+
+    // Додаткова перевірка кожну секунду (на випадок якщо хеш не змінився, але юзер клікнув лінку)
+    const interval = setInterval(() => {
+      if (window.location.hash === '#sale' && activeTab !== 'sale') {
+        setActiveTab('sale');
+      }
+    }, 500);
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+      clearInterval(interval);
+    };
+  }, [activeTab]);
 
   return (
     <section id="sale" className="w-full py-10 md:py-16 px-2 md:px-4 scroll-mt-20">
@@ -131,6 +142,10 @@ function ProductCard({ product }: { product: any }) {
     setMounted(true);
   }, []);
 
+  const isProductOutOfStock = product.sizes && product.sizes.length > 0
+    ? Object.values(product.stock_by_size || {}).every((v: any) => v <= 0)
+    : (product.stock_quantity ?? 0) <= 0;
+
   const handleAddToCart = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     
@@ -213,6 +228,11 @@ function ProductCard({ product }: { product: any }) {
                <span className="text-sm border-none leading-none">🔥</span> Хіт
              </div>
           )}
+          {isProductOutOfStock && (
+             <div className="px-2 py-0.5 md:px-3 md:py-1 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white bg-gray-500 shadow-sm">
+               НЕМАЄ В НАЯВНОСТІ
+             </div>
+          )}
         </div>
 
         {/* Кнопка вибраного (Топ право) */}
@@ -285,10 +305,11 @@ function ProductCard({ product }: { product: any }) {
                 <div className="flex items-center gap-2 mt-4 pt-4 border-t border-bottle/10">
                   <SheetClose asChild>
                     <Button 
+                      disabled={isProductOutOfStock}
                       onClick={() => handleAddToCart()}
-                      className="flex-1 bg-bottle text-milky h-12 rounded-none uppercase tracking-widest text-xs font-bold flex items-center justify-center gap-3 px-6"
+                      className="flex-1 bg-bottle text-milky h-12 rounded-none uppercase tracking-widest text-xs font-bold flex items-center justify-center gap-3 px-6 disabled:bg-gray-200 disabled:text-bottle/30"
                     >
-                      <ShoppingCart className="w-4 h-4 ml-1" /> В кошик
+                      {isProductOutOfStock ? 'Немає в наявності' : <><ShoppingCart className="w-4 h-4 ml-1" /> В кошик</>}
                     </Button>
                   </SheetClose>
                 </div>
@@ -356,10 +377,11 @@ function ProductCard({ product }: { product: any }) {
 
           <div className="flex items-center gap-2 mt-2">
             <Button 
+              disabled={isProductOutOfStock}
               onClick={handleAddToCart}
-              className="flex-1 bg-bottle text-milky hover:bg-bottle/90 h-10 rounded-none uppercase tracking-[0.2em] text-[10px] font-bold flex items-center justify-center gap-3 px-6"
+              className="flex-1 bg-bottle text-milky hover:bg-bottle/90 h-10 rounded-none uppercase tracking-[0.2em] text-[10px] font-bold flex items-center justify-center gap-3 px-6 disabled:bg-gray-200 disabled:text-bottle/30"
             >
-              <ShoppingCart className="w-3.5 h-3.5 ml-1" /> В кошик
+              {isProductOutOfStock ? 'Немає' : <><ShoppingCart className="w-3.5 h-3.5 ml-1" /> В кошик</>}
             </Button>
             <Button 
               variant="outline" 

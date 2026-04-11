@@ -44,12 +44,25 @@ async function processProductFormData(formData: FormData) {
     existingImagesList = [];
   }
 
+  // Об'єднуємо старі (якщо вони залишилися) та нові
+  // Якщо в FormData є 'image_sequence', використовуємо його для визначення порядку
+  const imageSequenceRaw = formData.get('image_sequence') as string;
+  let finalImages: string[] = [];
+
+  if (imageSequenceRaw) {
+    const sequence = JSON.parse(imageSequenceRaw);
+    finalImages = sequence.map((item: any) => {
+      if (item.type === 'existing') return item.url;
+      if (item.type === 'new') return newImageUrls[item.index];
+      return null;
+    }).filter(Boolean);
+  } else {
+    // Фоллбек для старої логіки або простих випадків
+    finalImages = [...existingImagesList, ...newImageUrls];
+  }
+
   const salesCountInput = formData.get('sales_count') as string;
   const salesCount = salesCountInput ? parseInt(salesCountInput, 10) : 0;
-
-  // Якщо користувач завантажив нові файли, ми використовуємо їх. 
-  // Якщо ні — залишаємо старі.
-  const finalImages = newImageUrls.length > 0 ? newImageUrls : existingImagesList;
 
   return {
     title: formData.get('title') as string,
@@ -66,6 +79,7 @@ async function processProductFormData(formData: FormData) {
     discount_price: discountPrice,
     images: finalImages,
     image_url: finalImages.length > 0 ? finalImages[0] : null, 
+    stock_by_size: formData.get('stock_by_size') ? JSON.parse(formData.get('stock_by_size') as string) : {},
   };
 }
 

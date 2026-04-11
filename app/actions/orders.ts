@@ -71,34 +71,32 @@ export async function createOrderAction(data: OrderFormData) {
       );
     }
 
-    // Зберігаємо замовлення в Supabase
-    const { data: order, error: dbError } = await supabaseAdmin
-      .from('orders')
-      .insert([{
-        order_number: orderNumber,
-        status: 'pending',
-        customer_id: customerId, // Прив'язка до профілю
-        customer_name: data.customerName,
-        customer_phone: data.customerPhone,
-        customer_email: data.customerEmail || null,
-        delivery_method: data.deliveryMethod,
-        city: data.city,
-        city_ref: data.cityRef || null,
-        warehouse: data.warehouse || null,
-        warehouse_ref: data.warehouseRef || null,
-        address: data.address || null,
-        payment_method: data.paymentMethod,
-        payment_status: 'pending',
-        items: data.items,
-        subtotal: Math.round(subtotal * 100), // у копійках
-        shipping_cost: Math.round(shippingCost * 100),
-        total: Math.round(total * 100),
-        comment: data.comment || null,
-      }])
-      .select()
-      .single();
+    // Зберігаємо замовлення в Supabase через RPC (з контролем залишків)
+    const { data: orderResponse, error: dbError } = await supabaseAdmin
+      .rpc('create_order_with_stock', {
+        p_order_number: orderNumber,
+        p_customer_id: customerId,
+        p_customer_name: data.customerName,
+        p_customer_phone: data.customerPhone,
+        p_customer_email: data.customerEmail || null,
+        p_delivery_method: data.deliveryMethod,
+        p_city: data.city,
+        p_city_ref: data.cityRef || null,
+        p_warehouse: data.warehouse || null,
+        p_warehouse_ref: data.warehouseRef || null,
+        p_address: data.address || null,
+        p_payment_method: data.paymentMethod,
+        p_payment_status: 'pending',
+        p_status: 'pending',
+        p_items: data.items,
+        p_subtotal: Math.round(subtotal * 100),
+        p_shipping_cost: Math.round(shippingCost * 100),
+        p_total: Math.round(total * 100),
+        p_comment: data.comment || null,
+      });
 
     if (dbError) throw new Error('Помилка збереження замовлення: ' + dbError.message);
+    const order = orderResponse;
 
     // Зберігаємо адресу доставки в профіль для наступного разу (якщо юзер авторизований)
     if (user) {

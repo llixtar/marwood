@@ -105,7 +105,7 @@ export function Footer() {
               </div>
               <div className="flex items-start gap-3 text-sm opacity-80">
                 <MapPin className="w-5 h-5 flex-shrink-0" strokeWidth={1.5} />
-                <span>Відправка з м. Хмельницький<br />по всій Україні</span>
+                <span>Відправка з м. Хмельницький<br />по Україні та за кордон</span>
               </div>
             </div>
           </div>

@@ -44,11 +44,5 @@ CREATE POLICY "Users can update own profile" ON customer_profiles
 CREATE POLICY "Service role full access" ON customer_profiles
   FOR ALL USING (true) WITH CHECK (true);
 
--- Додаємо customer_id до таблиці orders (якщо вона існує)
-DO $$
-BEGIN
-  IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'orders') THEN
-    ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_id UUID REFERENCES customer_profiles(id);
-    CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);
-  END IF;
-END $$;
+
+ALTER TABLE customer_profiles ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT false;

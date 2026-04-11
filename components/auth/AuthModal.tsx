@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { X, Mail, Lock, User, Phone, Eye, EyeOff, Loader2, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { signUpAction, signInAction } from '@/app/actions/auth';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useCartStore } from '@/lib/store/cartStore';
 import { useWishlistStore } from '@/lib/store/wishlistStore';
+import { useRouter } from 'next/navigation';
 
 type Props = {
   isOpen: boolean;
@@ -18,7 +19,9 @@ export function AuthModal({ isOpen, onClose }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const { initialize } = useAuthStore();
+  const { refreshSession } = useAuthStore();
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     if (isOpen) {
@@ -64,7 +67,10 @@ export function AuthModal({ isOpen, onClose }: Props) {
     const result = await signInAction({ email, password });
 
     if (result.success) {
-      await initialize();
+      await refreshSession();
+      startTransition(() => {
+        router.refresh(); // Оновлюємо серверні дані
+      });
       onClose();
       resetForm();
     } else {
@@ -91,7 +97,10 @@ export function AuthModal({ isOpen, onClose }: Props) {
       if (result.needsConfirmation) {
         setSuccess('Перевірте пошту для підтвердження реєстрації!');
       } else {
-        await initialize();
+        await refreshSession();
+        startTransition(() => {
+          router.refresh(); // Оновлюємо серверні дані
+        });
         onClose();
         resetForm();
       }

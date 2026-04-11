@@ -10,6 +10,7 @@ type AuthStore = {
   isInitialized: boolean;
 
   initialize: () => Promise<void>;
+  refreshSession: () => Promise<void>;
   setUser: (user: User | null) => void;
   setProfile: (profile: CustomerProfile | null) => void;
   fetchProfile: () => Promise<void>;
@@ -27,15 +28,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     
     const supabase = createClient();
     
-    // Отримуємо початкову сесію
-    const { data: { user } } = await supabase.auth.getUser();
-    set({ user, isLoading: false, isInitialized: true });
-
-    if (user) {
-      get().fetchProfile();
-    }
-
-    // Підписуємось на зміни авторизації
+    // Підписуємось на зміни авторизації (ОДИН РАЗ при ініціалізації)
     supabase.auth.onAuthStateChange(async (event, session) => {
       const newUser = session?.user || null;
       set({ user: newUser });
@@ -46,6 +39,18 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         set({ profile: null });
       }
     });
+
+    await get().refreshSession();
+  },
+
+  refreshSession: async () => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    set({ user, isLoading: false, isInitialized: true });
+
+    if (user) {
+      await get().fetchProfile();
+    }
   },
 
   setUser: (user) => set({ user }),

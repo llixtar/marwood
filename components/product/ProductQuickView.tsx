@@ -172,6 +172,10 @@ export function ProductQuickView({ product: initialProduct, isOpen, onClose }: P
     setTimeout(() => setShowToast(''), 2000);
   };
 
+  const isProductOutOfStock = product.sizes && product.sizes.length > 0
+    ? Object.values(product.stock_by_size || {}).every((v: any) => v <= 0)
+    : (product.stock_quantity ?? 0) <= 0;
+
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       {/* Спеціальний ширший Sheet для картки товару, особливо на екранах планшетів/ПК */}
@@ -336,15 +340,28 @@ export function ProductQuickView({ product: initialProduct, isOpen, onClose }: P
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {product.sizes.map((s: string) => (
-                    <button
-                      key={s}
-                      onClick={() => setSelectedSize(s)}
-                      className={`min-w-fit px-4 py-2 text-sm transition-all border ${selectedSize === s ? 'bg-bottle text-white border-bottle' : 'bg-transparent text-bottle hover:border-bottle/40 border-bottle/10'}`}
-                    >
-                      {s}
-                    </button>
-                  ))}
+                  {product.sizes.map((s: string) => {
+                    const stock = product.stock_by_size?.[s] ?? 0;
+                    const isOutOfStock = stock <= 0;
+                    
+                    return (
+                      <button
+                        key={s}
+                        disabled={isOutOfStock}
+                        onClick={() => setSelectedSize(s)}
+                        className={`min-w-fit px-4 py-2 text-sm transition-all border relative ${
+                          selectedSize === s 
+                            ? 'bg-bottle text-white border-bottle' 
+                            : 'bg-transparent text-bottle hover:border-bottle/40 border-bottle/10'
+                        } ${isOutOfStock ? 'opacity-40 grayscale cursor-not-allowed border-dashed' : ''}`}
+                      >
+                        {s}
+                        {isOutOfStock && (
+                          <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" title="Немає в наявності"></span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -388,7 +405,14 @@ export function ProductQuickView({ product: initialProduct, isOpen, onClose }: P
             <Heart className={`w-5 h-5 transition-all ${mounted && isInWishlist(product.id) ? 'fill-red-500' : ''}`} />
           </button>
 
-          {isInCart ? (
+          {isProductOutOfStock ? (
+            <button 
+              disabled
+              className="flex-1 bg-gray-200 text-bottle/40 uppercase tracking-[0.2em] text-xs font-bold transition-colors flex items-center justify-center gap-3 px-6 cursor-not-allowed"
+            >
+              Немає в наявності
+            </button>
+          ) : isInCart ? (
             <button 
               onClick={handleGoToCheckout}
               className="flex-1 bg-bottle text-milky hover:bg-bottle/90 uppercase tracking-[0.2em] text-xs font-bold transition-colors flex items-center justify-center gap-3 px-6 shadow-lg shadow-bottle/20"

@@ -311,6 +311,18 @@ export function ProductGridClient({ products }: ProductGridClientProps) {
                           Sale
                         </span>
                       )}
+                      {(() => {
+                        const stockValues = product.stock_by_size ? Object.values(product.stock_by_size) as number[] : [];
+                        const isSoldOut = stockValues.length > 0 && stockValues.every(v => v <= 0);
+                        if (isSoldOut) {
+                          return (
+                            <span className="bg-gray-500 text-white px-2 py-1 text-[9px] uppercase tracking-widest font-bold shadow-sm w-fit">
+                              НЕМАЄ В НАЯВНОСТІ
+                            </span>
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
 
                     <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
