@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export type CartItem = {
-  id: number;
+  id: string; // ЗМІНЕНО на string для підтримки UUID
   title: string;
   price: number;
   discount_price?: number | null;
@@ -21,8 +21,8 @@ type CartStore = {
   toggleCart: () => void;
 
   addItem: (product: Omit<CartItem, 'quantity'>) => void;
-  removeItem: (id: number, selectedSize?: string) => void;
-  updateQty: (id: number, selectedSize: string | undefined, delta: number) => void;
+  removeItem: (id: string, selectedSize?: string) => void;
+  updateQty: (id: string, selectedSize: string | undefined, delta: number) => void;
   clearCart: () => void;
   setItems: (items: CartItem[]) => void;
 
@@ -30,7 +30,7 @@ type CartStore = {
   totalPrice: () => number;
 };
 
-const itemKey = (id: number, size?: string) => `${id}__${size ?? ''}`;
+const itemKey = (id: string, size?: string) => `${id}__${size ?? ''}`;
 
 export const useCartStore = create<CartStore>()(
   persist(

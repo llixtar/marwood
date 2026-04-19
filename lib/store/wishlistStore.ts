@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export type WishlistItem = {
-  id: number;
+  id: string; // ЗМІНЕНО на string для підтримки UUID
   title: string;
   price: number;
   discount_price?: number | null;
@@ -23,12 +23,12 @@ type WishlistStore = {
   toggleWishlist: () => void;
 
   addItem: (product: WishlistItem) => void;
-  removeItem: (id: number) => void;
+  removeItem: (id: string) => void;
   toggleItem: (product: WishlistItem) => void;
   clearWishlist: () => void;
   setItems: (items: WishlistItem[]) => void;
 
-  isInWishlist: (id: number) => boolean;
+  isInWishlist: (id: string) => boolean;
   totalItems: () => number;
 };
 

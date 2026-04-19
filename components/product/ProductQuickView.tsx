@@ -78,8 +78,8 @@ export function ProductQuickView({ product: initialProduct, isOpen, onClose }: P
           .eq('sku', product.sku);
 
         if (data && data.length > 0) {
-          // Сортуємо по ID щоб порядок був однаковим
-          const sortedData = data.sort((a, b) => a.id - b.id);
+          // Сортуємо за ID (UUID) для стабільного порядку
+          const sortedData = data.sort((a, b) => a.id.localeCompare(b.id));
           setVariants(sortedData);
         }
       };
