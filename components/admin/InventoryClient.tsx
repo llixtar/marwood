@@ -13,7 +13,9 @@ const CATEGORIES = [
   { slug: 'robes', name: 'Халати' },
   { slug: 'pajamas', name: 'Піжами' },
   { slug: 'body', name: 'Боді' },
-  { slug: 'plus-size', name: 'Плюс сайз' }
+  { slug: 'plus-size', name: 'Плюс сайз (всі)' },
+  { slug: 'plus-size-swimwear', name: 'Купальники (Plus Size)' },
+  { slug: 'swimwear', name: 'Купальники' }
 ];
 
 export function InventoryClient({ initialProducts }: { initialProducts: any[] }) {

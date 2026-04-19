@@ -26,7 +26,7 @@ export type OrderFormData = {
   paymentMethod: 'monopay' | 'cod';
   comment?: string;
   items: {
-    id: number;
+    id: string;
     title: string;
     price: number;
     discount_price?: number | null;

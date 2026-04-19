@@ -16,7 +16,7 @@ function transliterate(str: string): string {
   return str.toLowerCase().split('').map(char => ukrainianToLatinMap[char] ?? (/[a-z0-9-]/.test(char) ? char : '')).join('').replace(/-+/g, '-').replace(/^-|-$/g, '');
 }
 
-const AVAILABLE_SIZES = ['A-B', 'C-D', 'FREE', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '70A', '70B', '70C', '75A', '75B', '75C', '80B', '80C', '85B', '85C'];
+const AVAILABLE_SIZES = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL'];
 const AVAILABLE_COLORS = ['Чорний', 'Білий', 'Червоний', 'Бежевий', 'Рожевий', 'Синій', 'Бордовий', 'Різнокольоровий', 'Зелений'];
 
 type ManagedImage = {
@@ -46,6 +46,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
   const [title, setTitle] = useState(initialData?.title || '');
   const [color, setColor] = useState(initialData?.color || '');
+  const [sku, setSku] = useState(initialData?.sku || '');
   const [slug, setSlug] = useState(initialData?.slug || '');
   const [autoSlug, setAutoSlug] = useState(true); // Завжди ввімкнено за замовчуванням
   
@@ -54,10 +55,10 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
   useEffect(() => {
     if (!autoSlug) return;
-    const baseStr = `${title} ${color}`.trim();
+    const baseStr = `${title} ${color} ${sku}`.trim();
     if (baseStr) setSlug(transliterate(baseStr));
     else setSlug('');
-  }, [title, color, autoSlug]);
+  }, [title, color, sku, autoSlug]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -94,7 +95,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
       setStockBySize(curr => {
         const updated = { ...curr };
         if (next.includes(size)) {
-          if (updated[size] === undefined) updated[size] = 0;
+          if (updated[size] === undefined) updated[size] = 1;
         } else {
           delete updated[size];
         }
@@ -335,10 +336,10 @@ export function ProductForm({ initialData }: ProductFormProps) {
                   <input 
                     type="number"
                     min="0"
-                    value={stockBySize[size] ?? 0}
+                    value={stockBySize[size] ?? 1}
                     onChange={(e) => handleStockChange(size, e.target.value)}
                     className="w-full border-b border-bottle/20 py-1 focus:border-bottle transition-colors text-sm font-bold outline-none bg-transparent"
-                    placeholder="0"
+                    placeholder="1"
                   />
                 </div>
               ))}
@@ -355,7 +356,13 @@ export function ProductForm({ initialData }: ProductFormProps) {
         <div className="grid grid-cols-2 md:grid-cols-7 gap-4 items-end bg-gray-50 p-4 border border-bottle/5 rounded-sm">
           <div className="flex flex-col gap-1 md:col-span-1">
             <label className="text-[10px] uppercase tracking-widest font-bold text-bottle/70 flex items-center gap-1"><Fingerprint className="w-3 h-3"/> Артикул</label>
-            <input name="sku" defaultValue={initialData?.sku} className="w-full border-b border-bottle/30 py-1 focus:border-bottle transition-colors text-sm font-medium outline-none bg-transparent" placeholder="MD-1050" />
+            <input 
+              name="sku" 
+              value={sku}
+              onChange={(e) => setSku(e.target.value)}
+              className="w-full border-b border-bottle/30 py-1 focus:border-bottle transition-colors text-sm font-medium outline-none bg-transparent" 
+              placeholder="MD-1050" 
+            />
           </div>
 
           <div className="flex flex-col gap-1 md:col-span-1">
@@ -378,7 +385,9 @@ export function ProductForm({ initialData }: ProductFormProps) {
               <option value="robes">Халати</option>
               <option value="pajamas">Піжами</option>
               <option value="body">Боді</option>
-              <option value="plus-size">Плюс сайз</option>
+              <option value="plus-size">Плюс сайз (інше)</option>
+              <option value="plus-size-swimwear">Купальники (Plus Size)</option>
+              <option value="swimwear">Купальники</option>
             </select>
           </div>
 

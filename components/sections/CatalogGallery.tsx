@@ -14,16 +14,17 @@ import {
 const topCategories = [
   { id: 1, title: 'Еротична білизна', link: '/category/erotic', image: '/categories/erotic.jpg' },
   { id: 2, title: 'Костюми еротичні', link: '/category/costumes', image: '/categories/costumes.jpg' },
-  { id: 3, title: 'Піжами', link: '/category/pajamas', image: '/categories/pajamas.jpg' },
+  { id: 3, title: 'Купальники', link: '/category/swimwear', image: '/categories/swimwear.jpg' },
 ];
 
-// Дані для нижнього ряду (5 картинок)
+// Дані для нижнього ряду (6 картинок)
 const bottomCategories = [
   { id: 4, title: 'Базова білизна', link: '/category/basic', image: '/categories/basic.jpg' },
   { id: 5, title: 'Труси', link: '/category/panties', image: '/categories/panties2.jpg' },
   { id: 6, title: 'Боді', link: '/category/body', image: '/categories/body.jpg' },
   { id: 7, title: 'Халати', link: '/category/robes', image: '/categories/robes.jpg' },
-  { id: 8, title: 'Плюс сайз', link: '/category/plus-size', image: '/categories/plus-size.jpg' },
+  { id: 8, title: 'Піжами', link: '/category/pajamas', image: '/categories/pajamas.jpg' },
+  { id: 9, title: 'Плюс сайз', link: '/category/plus-size', image: '/categories/plus-size.jpg' },
 ];
 
 export function CatalogGallery() {
@@ -46,8 +47,8 @@ export function CatalogGallery() {
               <CategoryCard key={cat.id} category={cat} />
             ))}
           </div>
-          {/* Нижній ряд: 5 колонок */}
-          <div className="grid grid-cols-5 gap-4 h-[350px]">
+          {/* Нижній ряд: 6 колонок (для балансу) */}
+          <div className="grid grid-cols-6 gap-4 h-[350px]">
             {bottomCategories.map((cat) => (
               <CategoryCard key={cat.id} category={cat} />
             ))}

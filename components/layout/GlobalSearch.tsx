@@ -155,6 +155,8 @@ export function GlobalSearch() {
                       { name: 'Еротична білизна', slug: 'erotic' },
                       { name: 'Халати', slug: 'robes' },
                       { name: 'Боді', slug: 'body' },
+                      { name: 'Купальники', slug: 'swimwear' },
+                      { name: 'Купальники Plus Size', slug: 'plus-size-swimwear' },
                     ].map((cat) => (
                       <button
                         key={cat.slug}

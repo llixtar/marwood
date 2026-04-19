@@ -6,7 +6,7 @@ import { Loader2, Plus, AlertCircle, ChevronDown, ChevronUp, Save } from 'lucide
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
-const ALL_SIZES = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'];
+const ALL_SIZES = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL'];
 
 type Product = {
   id: string;
