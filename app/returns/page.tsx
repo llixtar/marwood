@@ -33,7 +33,7 @@ export default function ReturnsPage() {
           {/* Наша лояльність */}
           <section className="bg-white p-8 md:p-12 shadow-sm border border-bottle/5 space-y-8">
             <h2 className="text-xl md:text-2xl font-light uppercase tracking-widest text-bottle mb-6">Проте, ми цінуємо наших клієнтів</h2>
-            
+
             <p className="text-bottle/80 leading-relaxed">
               Ми розуміємо, що іноді важко обрати розмір онлайн. Тому Marwood пропонує можливість **обміну** за таких умов:
             </p>
@@ -59,7 +59,7 @@ export default function ReturnsPage() {
                   <span className="text-xs uppercase font-bold tracking-widest">Обмін неможливий, якщо:</span>
                 </div>
                 <ul className="text-sm text-bottle/70 space-y-3">
-                  <li>• Трус або боді були приміряні на голе тіло.</li>
+                  <li>• Труси або боді були приміряні на голе тіло.</li>
                   <li>• Товар було попрано або пошкоджено.</li>
                   <li>• Зрізані бірки або пошкоджена упаковка.</li>
                   <li>• З моменту отримання пройшло більше 14 днів.</li>
@@ -74,7 +74,7 @@ export default function ReturnsPage() {
               <RefreshCw strokeWidth={1.5} className="w-10 h-10" />
               <h2 className="text-xl md:text-2xl font-light uppercase tracking-widest">Як здійснити обмін?</h2>
             </div>
-            
+
             <ol className="list-decimal list-inside space-y-6 text-sm opacity-90 leading-relaxed font-light">
               <li>Напишіть нам в Instagram або зв&apos;яжіться за номером телефону.</li>
               <li>Надішліть фото товару та вкажіть причину обміну (не підійшов розмір / виявлено дефект).</li>

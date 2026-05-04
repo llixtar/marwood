@@ -22,10 +22,10 @@ export default function DeliveryPage() {
               </div>
               <h2 className="text-xl md:text-2xl font-light uppercase tracking-widest text-bottle">Доставка</h2>
             </div>
-            
+
             <div className="space-y-6 text-bottle/80 leading-relaxed">
               <p>Ми здійснюємо доставку по всій території України, а також в інші країни, де є відділення <strong>Нової Пошти</strong>.</p>
-              
+
               <ul className="list-none space-y-4">
                 <li className="flex gap-4">
                   <span className="text-bottle">•</span>
@@ -49,7 +49,7 @@ export default function DeliveryPage() {
                   </div>
                 </li>
               </ul>
-              <p className="text-sm italic">Відправки здійснюються з м. Хмельницький щодня, окрім неділі.</p>
+              <p className="text-sm italic">Відправки здійснюються зі складів у с. Шаровечка (Хмельницька обл.) або м. Луцьк щодня, окрім неділі. Самовивозу немає.</p>
             </div>
           </section>
 
@@ -64,7 +64,7 @@ export default function DeliveryPage() {
 
             <div className="space-y-6 text-bottle/80 leading-relaxed">
               <p>Ви можете обрати найбільш зручний для вас спосіб оплати замовлення:</p>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="p-6 border border-bottle/10">
                   <p className="font-bold text-bottle uppercase text-xs tracking-widest mb-2">Онлайн-оплата</p>
@@ -79,7 +79,7 @@ export default function DeliveryPage() {
               <div className="flex items-start gap-3 p-4 bg-amber-50/50 border-l-2 border-amber-200">
                 <ShieldCheck className="w-5 h-5 text-amber-600 flex-shrink-0" />
                 <p className="text-sm text-amber-900">
-                  <strong>Зверніть увагу:</strong> Ми працюємо за повною або частковою передоплатою (150 ₴), оскільки білизна — це інтимний товар.
+                  <strong>Зверніть увагу:</strong> Ми працюємо за повною або частковою передоплатою (200 ₴), оскільки білизна — це інтимний товар.
                 </p>
               </div>
             </div>
@@ -88,7 +88,7 @@ export default function DeliveryPage() {
           <section className="text-center space-y-4">
             <p className="text-sm text-bottle/50 uppercase tracking-widest">Виникли питання?</p>
             <div className="flex justify-center gap-8">
-              <a href="tel:+380680000000" className="text-bottle font-bold hover:underline">+38 (068) 000-00-00</a>
+              <a href="tel:+380755456857" className="text-bottle font-bold hover:underline">+380 75 545 68 57</a>
               <a href="mailto:info@marwood.ua" className="text-bottle font-bold hover:underline">info@marwood.ua</a>
             </div>
           </section>

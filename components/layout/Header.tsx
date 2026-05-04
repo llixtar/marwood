@@ -60,7 +60,7 @@ export function Header() {
                 <nav className="flex flex-col gap-2 mt-8 pl-6">
 
                   {/* КАТАЛОГ (Мобільний випадаючий список) */}
-                  <details className="group py-2">
+                  <details className="group py-2" open>
                     <summary className="flex cursor-pointer list-none items-center gap-2 text-xl font-medium text-bottle [&::-webkit-details-marker]:hidden">
                       Каталог
                       <ChevronDown className="h-5 w-5 transition-transform group-open:rotate-180" />
@@ -118,6 +118,7 @@ export function Header() {
                     <div className="mt-4 flex flex-col gap-4 pl-4 border-l-2 border-bottle/10">
                       <SheetClose asChild><Link href="/delivery" className="text-base text-bottle/80 hover:text-bottle">Оплата і доставка</Link></SheetClose>
                       <SheetClose asChild><Link href="/returns" className="text-base text-bottle/80 hover:text-bottle">Обмін та повернення</Link></SheetClose>
+                      <SheetClose asChild><Link href="/care" className="text-base text-bottle/80 hover:text-bottle">Догляд за білизною</Link></SheetClose>
                       <SheetClose asChild><Link href="/reviews" className="text-base text-bottle/80 hover:text-bottle">Відгуки</Link></SheetClose>
                     </div>
                   </details>
@@ -231,6 +232,7 @@ export function Header() {
                     <ul className="grid w-[240px] gap-2 p-4 bg-milky shadow-2xl border border-bottle/10 rounded-md">
                       <li><NavigationMenuLink asChild><Link href="/delivery" onClick={handleLinkClick} className="block p-3 hover:bg-bottle hover:text-white text-bottle rounded-md transition-all text-sm font-medium">Оплата і доставка</Link></NavigationMenuLink></li>
                       <li><NavigationMenuLink asChild><Link href="/returns" onClick={handleLinkClick} className="block p-3 hover:bg-bottle hover:text-white text-bottle rounded-md transition-all text-sm font-medium">Обмін та повернення</Link></NavigationMenuLink></li>
+                      <li><NavigationMenuLink asChild><Link href="/care" onClick={handleLinkClick} className="block p-3 hover:bg-bottle hover:text-white text-bottle rounded-md transition-all text-sm font-medium">Догляд за білизною</Link></NavigationMenuLink></li>
                       <li><NavigationMenuLink asChild><Link href="/reviews" onClick={handleLinkClick} className="block p-3 hover:bg-bottle hover:text-white text-bottle rounded-md transition-all text-sm font-medium">Відгуки</Link></NavigationMenuLink></li>
                     </ul>
                   </NavigationMenuContent>
