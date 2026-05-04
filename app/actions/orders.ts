@@ -33,6 +33,7 @@ export type OrderFormData = {
     image?: string;
     selectedSize?: string;
     quantity: number;
+    sku?: string;
   }[];
 };
 
@@ -134,11 +135,15 @@ export async function createOrderAction(data: OrderFormData) {
       }
     }
 
-    // COD (наложений платіж) — одразу підтверджуємо
-    await supabaseAdmin
+    // COD (наложений платіж) — встановлюємо спеціальний статус "Очікує передоплати"
+    const { error: updateError } = await supabaseAdmin
       .from('orders')
-      .update({ status: 'confirmed' })
+      .update({ status: 'awaiting_payment' })
       .eq('id', order.id);
+
+    if (updateError) {
+      console.error('Помилка оновлення статусу до pending:', updateError);
+    }
 
     return {
       success: true,
@@ -213,3 +218,30 @@ async function createMonoInvoice(
     return { success: false, error: error.message };
   }
 }
+
+ export async function getAllOrdersAdmin() {
+   const { data: orders, error } = await supabaseAdmin
+     .from('orders')
+     .select('*')
+     .order('created_at', { ascending: false });
+ 
+   if (error) {
+     console.error('getAllOrdersAdmin error:', error);
+     return [];
+   }
+ 
+   return orders || [];
+ }
+
+ export async function updateOrderStatus(orderId: string, status: string) {
+   const { error } = await supabaseAdmin
+     .from('orders')
+     .update({ status })
+     .eq('id', orderId);
+ 
+   if (error) {
+     console.error('updateOrderStatus error:', error);
+     return { success: false, error: error.message };
+   }
+   return { success: true };
+ }

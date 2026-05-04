@@ -19,6 +19,7 @@ export type CustomerProfile = {
   is_guest: boolean;
   cart_data: any;
   wishlist_data: any;
+  is_admin: boolean;
 };
 
 export async function getCustomerProfile(authUserId: string): Promise<CustomerProfile | null> {
