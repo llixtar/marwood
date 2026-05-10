@@ -442,35 +442,54 @@ export function CheckoutForm() {
               </button>
 
               {paymentMethod.startsWith('details') && (
-                <div className="px-14 pb-4 space-y-3">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('details_full')}
-                    className="flex items-center gap-3 group"
-                  >
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
-                      paymentMethod === 'details_full' ? 'border-bottle bg-bottle' : 'border-bottle/30'
-                    }`}>
-                      {paymentMethod === 'details_full' && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                <div className="px-4 sm:px-14 pb-4 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8 border-t border-bottle/5 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('details_full')}
+                      className="flex items-center gap-3 group"
+                    >
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
+                        paymentMethod === 'details_full' ? 'border-bottle bg-bottle' : 'border-bottle/30'
+                      }`}>
+                        {paymentMethod === 'details_full' && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                      </div>
+                      <span className={`text-[11px] uppercase tracking-wider font-bold ${
+                        paymentMethod === 'details_full' ? 'text-bottle' : 'text-bottle/40'
+                      }`}>Повна оплата</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('details_cod')}
+                      className="flex items-center gap-3 group"
+                    >
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
+                        paymentMethod === 'details_cod' ? 'border-bottle bg-bottle' : 'border-bottle/30'
+                      }`}>
+                        {paymentMethod === 'details_cod' && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                      </div>
+                      <span className={`text-[11px] uppercase tracking-wider font-bold ${
+                        paymentMethod === 'details_cod' ? 'text-bottle' : 'text-bottle/40'
+                      }`}>Наложений платіж (200 ₴)</span>
+                    </button>
+                  </div>
+
+                  {/* Реквізити Preview */}
+                  <div className="bg-bottle text-milky p-4 rounded-sm space-y-3 opacity-90">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="space-y-1">
+                        <p className="text-[8px] uppercase tracking-tighter opacity-40">IBAN</p>
+                        <p className="text-[10px] font-mono font-bold break-all">UA000000000000000000000000000</p>
+                      </div>
+                      <div className="space-y-1 text-right">
+                        <p className="text-[8px] uppercase tracking-tighter opacity-40">ЄДРПОУ</p>
+                        <p className="text-[10px] font-mono font-bold">12345678</p>
+                      </div>
                     </div>
-                    <span className={`text-[11px] uppercase tracking-wider font-bold ${
-                      paymentMethod === 'details_full' ? 'text-bottle' : 'text-bottle/40'
-                    }`}>Повна оплата</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('details_cod')}
-                    className="flex items-center gap-3 group"
-                  >
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
-                      paymentMethod === 'details_cod' ? 'border-bottle bg-bottle' : 'border-bottle/30'
-                    }`}>
-                      {paymentMethod === 'details_cod' && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
-                    </div>
-                    <span className={`text-[11px] uppercase tracking-wider font-bold ${
-                      paymentMethod === 'details_cod' ? 'text-bottle' : 'text-bottle/40'
-                    }`}>Наложений платіж (200 ₴ передоплата)</span>
-                  </button>
+                    <p className="text-[9px] italic opacity-60 border-t border-milky/10 pt-2">
+                      * Реквізити та номер замовлення будуть доступні для копіювання після підтвердження.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>

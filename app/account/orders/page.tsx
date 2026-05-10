@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { getCustomerOrders } from '@/app/actions/customers';
 import { getAllOrdersAdmin, updateOrderStatus } from '@/app/actions/orders';
-import { Package, Truck, Clock, CheckCircle2, ChevronRight, ShoppingBag, ExternalLink, Search, Mail, Phone, MapPin, CreditCard, User, XCircle } from 'lucide-react';
+import { Package, Truck, Clock, CheckCircle2, ChevronRight, ShoppingBag, ExternalLink, Search, Mail, Phone, MapPin, CreditCard, User, XCircle, Info } from 'lucide-react';
+import { CopyButton } from '@/components/checkout/CopyButton';
 import Link from 'next/link';
 
 type Order = {
@@ -24,6 +25,8 @@ type Order = {
   customer_phone?: string;
   customer_email?: string;
   sku?: string;
+  paid_amount?: number;
+  ttn?: string;
 };
 
 export default function OrdersPage() {
@@ -31,7 +34,9 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [activeTab, setActiveTab] = useState<'new' | 'all'>('all');
+  const [activeTab, setActiveTab] = useState<'new' | 'processing' | 'shipped' | 'all'>('all');
+  const [adminPaidAmount, setAdminPaidAmount] = useState<string>('');
+  const [adminTTN, setAdminTTN] = useState<string>('');
 
   const isAdmin = profile?.is_admin === true;
 
@@ -67,35 +72,58 @@ export default function OrdersPage() {
     }
   }, [user, isInitialized, isAdmin]);
 
-  const handleCancelOrder = async (orderId: string) => {
-    if (!confirm('Ви впевнені, що хочете скасувати це замовлення?')) return;
-    
-    const res = await updateOrderStatus(orderId, 'cancelled');
+  const handleUpdateOrder = async (orderId: string, status: string, adminData?: { paidAmount?: number; ttn?: string }) => {
+    const res = await updateOrderStatus(orderId, status, adminData);
     if (res.success) {
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: 'cancelled' } : o));
+      setOrders(prev => prev.map(o => o.id === orderId ? { 
+        ...o, 
+        status,
+        paid_amount: adminData?.paidAmount !== undefined ? Math.round(adminData.paidAmount * 100) : o.paid_amount,
+        ttn: adminData?.ttn !== undefined ? adminData.ttn : o.ttn
+      } : o));
+      
       if (selectedOrder?.id === orderId) {
-        setSelectedOrder({ ...selectedOrder, status: 'cancelled' });
+        setSelectedOrder(prev => prev ? { 
+          ...prev, 
+          status,
+          paid_amount: adminData?.paidAmount !== undefined ? Math.round(adminData.paidAmount * 100) : prev.paid_amount,
+          ttn: adminData?.ttn !== undefined ? adminData.ttn : prev.ttn
+        } : null);
       }
-      // Оновлюємо лічильник у хедері
+      
       window.dispatchEvent(new CustomEvent('refresh-orders-count'));
     } else {
-      alert('Помилка при скасуванні замовлення');
+      alert('Помилка при оновленні замовлення: ' + res.error);
     }
   };
 
-  const handleConfirmOrder = async (orderId: string) => {
-    if (!confirm('Ви впевнені, що хочете підтвердити це замовлення?')) return;
+  const handleCancelOrder = (orderId: string) => {
+    if (!confirm('Ви впевнені, що хочете скасувати це замовлення?')) return;
+    handleUpdateOrder(orderId, 'cancelled');
+  };
+
+  const handleConfirmOrder = (orderId: string) => {
+    const amount = parseFloat(adminPaidAmount);
+    if (isNaN(amount)) {
+      if (!confirm('Сума оплати не введена. Підтвердити без оплати?')) return;
+      handleUpdateOrder(orderId, 'confirmed');
+    } else {
+      handleUpdateOrder(orderId, 'confirmed', { paidAmount: amount });
+      setAdminPaidAmount('');
+    }
+  };
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!confirm('ВИ ВПЕВНЕНІ? Це замовлення буде назавжди видалено з бази даних!')) return;
     
-    const res = await updateOrderStatus(orderId, 'confirmed');
+    const res = await deleteOrderAdmin(orderId);
     if (res.success) {
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: 'confirmed' } : o));
+      setOrders(prev => prev.filter(o => o.id !== orderId));
       if (selectedOrder?.id === orderId) {
-        setSelectedOrder({ ...selectedOrder, status: 'confirmed' });
+        setSelectedOrder(null);
       }
-      // Оновлюємо лічильник у хедері
       window.dispatchEvent(new CustomEvent('refresh-orders-count'));
     } else {
-      alert('Помилка при підтвердженні замовлення');
+      alert('Помилка при видаленні: ' + res.error);
     }
   };
 
@@ -127,8 +155,11 @@ export default function OrdersPage() {
       case 'pending': return 'bg-yellow-50 text-yellow-700 border-yellow-200';
       case 'awaiting_payment': return 'bg-red-50 text-red-600 border-red-100';
       case 'confirmed': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'shipped': return 'bg-purple-100 text-purple-700 border-purple-200';
-      case 'completed': return 'bg-green-100 text-green-700 border-green-200';
+      case 'packing': return 'bg-orange-100 text-orange-700 border-orange-200';
+      case 'handed_to_delivery': return 'bg-cyan-100 text-cyan-700 border-cyan-200';
+      case 'shipped': return 'bg-green-50 text-green-700 border-green-100';
+      case 'delivered': return 'bg-green-100 text-green-800 border-green-200';
+      case 'completed': return 'bg-green-600 text-white border-green-600';
       case 'cancelled': return 'bg-red-100 text-red-700 border-red-200';
       default: return 'bg-gray-100 text-gray-700 border-gray-200';
     }
@@ -138,8 +169,11 @@ export default function OrdersPage() {
     switch (status) {
       case 'pending': return 'Очікує (MonoPay)';
       case 'awaiting_payment': return 'Очікує оплати (Реквізити)';
-      case 'confirmed': return 'Підтверджено';
-      case 'shipped': return 'Відправлено';
+      case 'confirmed': return 'Підтверджено / Оплачено';
+      case 'packing': return 'Пакування';
+      case 'handed_to_delivery': return 'Передано на пошту';
+      case 'shipped': return 'Надіслано';
+      case 'delivered': return 'Отримано';
       case 'completed': return 'Виконано';
       case 'cancelled': return 'Скасовано';
       default: return status;
@@ -189,12 +223,12 @@ export default function OrdersPage() {
               </div>
 
               {isAdmin && (
-                <div className="flex gap-4 mb-8 border-b border-bottle/5">
+                <div className="flex gap-4 mb-8 border-b border-bottle/5 overflow-x-auto pb-1 scrollbar-hide">
                   <button 
                     onClick={() => setActiveTab('new')}
-                    className={`pb-4 text-[10px] uppercase tracking-widest font-bold transition-all relative ${activeTab === 'new' ? 'text-bottle' : 'text-bottle/30 hover:text-bottle/60'}`}
+                    className={`pb-4 text-[10px] uppercase tracking-widest font-bold transition-all relative whitespace-nowrap ${activeTab === 'new' ? 'text-bottle' : 'text-bottle/30 hover:text-bottle/60'}`}
                   >
-                    Нові замовлення
+                    Нові
                     <span className={`absolute bottom-0 left-0 w-full h-[2px] bg-bottle transition-transform duration-300 ${activeTab === 'new' ? 'scale-x-100' : 'scale-x-0'}`} />
                     {orders.filter(o => o.status === 'pending' || o.status === 'awaiting_payment').length > 0 && (
                       <span className="ml-2 bg-red-500 text-white text-[8px] px-1.5 py-0.5 rounded-full animate-pulse">
@@ -203,10 +237,34 @@ export default function OrdersPage() {
                     )}
                   </button>
                   <button 
-                    onClick={() => setActiveTab('all')}
-                    className={`pb-4 text-[10px] uppercase tracking-widest font-bold transition-all relative ${activeTab === 'all' ? 'text-bottle' : 'text-bottle/30 hover:text-bottle/60'}`}
+                    onClick={() => setActiveTab('processing')}
+                    className={`pb-4 text-[10px] uppercase tracking-widest font-bold transition-all relative whitespace-nowrap ${activeTab === 'processing' ? 'text-bottle' : 'text-bottle/30 hover:text-bottle/60'}`}
                   >
-                    Всі замовлення
+                    В обробці
+                    <span className={`absolute bottom-0 left-0 w-full h-[2px] bg-bottle transition-transform duration-300 ${activeTab === 'processing' ? 'scale-x-100' : 'scale-x-0'}`} />
+                    {orders.filter(o => o.status === 'confirmed' || o.status === 'packing' || o.status === 'handed_to_delivery').length > 0 && (
+                      <span className="ml-2 bg-blue-500 text-white text-[8px] px-1.5 py-0.5 rounded-full animate-pulse">
+                        {orders.filter(o => o.status === 'confirmed' || o.status === 'packing' || o.status === 'handed_to_delivery').length}
+                      </span>
+                    )}
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('shipped')}
+                    className={`pb-4 text-[10px] uppercase tracking-widest font-bold transition-all relative whitespace-nowrap ${activeTab === 'shipped' ? 'text-bottle' : 'text-bottle/30 hover:text-bottle/60'}`}
+                  >
+                    Відправлені
+                    <span className={`absolute bottom-0 left-0 w-full h-[2px] bg-bottle transition-transform duration-300 ${activeTab === 'shipped' ? 'scale-x-100' : 'scale-x-0'}`} />
+                    {orders.filter(o => o.status === 'shipped' || o.status === 'delivered').length > 0 && (
+                      <span className="ml-2 bg-green-600 text-white text-[8px] px-1.5 py-0.5 rounded-full animate-pulse">
+                        {orders.filter(o => o.status === 'shipped' || o.status === 'delivered').length}
+                      </span>
+                    )}
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('all')}
+                    className={`pb-4 text-[10px] uppercase tracking-widest font-bold transition-all relative whitespace-nowrap ${activeTab === 'all' ? 'text-bottle' : 'text-bottle/30 hover:text-bottle/60'}`}
+                  >
+                    Всі
                     <span className={`absolute bottom-0 left-0 w-full h-[2px] bg-bottle transition-transform duration-300 ${activeTab === 'all' ? 'scale-x-100' : 'scale-x-0'}`} />
                   </button>
                 </div>
@@ -226,7 +284,13 @@ export default function OrdersPage() {
               ) : (
                 <div className="space-y-4">
                   {orders
-                    .filter(order => isAdmin && activeTab === 'new' ? (order.status === 'pending' || order.status === 'awaiting_payment') : true)
+                    .filter(order => {
+                      if (!isAdmin) return true;
+                      if (activeTab === 'new') return order.status === 'pending' || order.status === 'awaiting_payment';
+                      if (activeTab === 'processing') return order.status === 'confirmed' || order.status === 'packing' || order.status === 'handed_to_delivery';
+                      if (activeTab === 'shipped') return order.status === 'shipped' || order.status === 'delivered';
+                      return true;
+                    })
                     .map((order) => (
                     <div 
                       key={order.id} 
@@ -264,7 +328,16 @@ export default function OrdersPage() {
                             {getStatusLabel(order.status)}
                           </div>
                           <div className="text-sm font-light text-bottle">
-                            {(order.total / 100).toLocaleString('uk-UA')} ₴
+                            {isAdmin ? (
+                              <div className="flex flex-col items-end leading-none gap-1">
+                                <span className="text-[8px] text-bottle/40 uppercase font-bold tracking-widest">До сплати:</span>
+                                <span className="font-medium text-xs">
+                                  {((order.total - (order.paid_amount || 0)) / 100).toLocaleString('uk-UA')} ₴
+                                </span>
+                              </div>
+                            ) : (
+                              `${(order.total / 100).toLocaleString('uk-UA')} ₴`
+                            )}
                           </div>
                           <ChevronRight className={`w-4 h-4 text-bottle/20 transition-transform ${selectedOrder?.id === order.id ? 'rotate-90' : ''}`} />
                         </div>
@@ -367,10 +440,10 @@ export default function OrdersPage() {
 
                             <div className="space-y-4">
                               <h3 className="text-[10px] uppercase tracking-widest font-bold text-bottle/40 ml-1">Оплата</h3>
-                              <div className="bg-white p-4 border border-bottle/5 rounded-sm space-y-3">
-                                <div className="flex gap-3">
+                              <div className="bg-white border border-bottle/5 rounded-sm overflow-hidden">
+                                <div className="p-4 flex gap-3">
                                   <CreditCard className="w-4 h-4 text-bottle/20 mt-0.5" />
-                                  <div>
+                                  <div className="flex-grow">
                                     <p className="text-[10px] uppercase tracking-tighter text-bottle/40 font-bold">Метод та статус</p>
                                     <p className="text-xs text-bottle mt-1">
                                       {order.payment_method === 'monopay' && 'Онлайн (MonoPay)'}
@@ -383,28 +456,127 @@ export default function OrdersPage() {
                                     </p>
                                   </div>
                                 </div>
+
+                                {/* Сплачено / Залишок / ТТН */}
+                                {(order.paid_amount > 0 || order.ttn) && (
+                                  <div className="border-t border-bottle/5 p-4 space-y-3 bg-milky/30">
+                                    {order.paid_amount > 0 && (
+                                      <div className="flex justify-between items-center text-[10px]">
+                                        <div className="space-y-0.5">
+                                          <p className="text-bottle/40 uppercase tracking-widest font-bold">Оплата</p>
+                                          <p className="text-bottle font-medium">Сплачено: {(order.paid_amount / 100).toLocaleString('uk-UA')} ₴</p>
+                                        </div>
+                                        <div className="text-right space-y-0.5">
+                                          <p className="text-bottle/40 uppercase tracking-widest font-bold">Залишок</p>
+                                          <p className="text-bottle font-bold text-xs">{((order.total - order.paid_amount) / 100).toLocaleString('uk-UA')} ₴</p>
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    {order.ttn && (
+                                      <div className="pt-2 border-t border-bottle/5 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                          <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center">
+                                            <Truck className="w-3 h-3 text-blue-600" />
+                                          </div>
+                                          <span className="text-[10px] font-bold text-blue-700 uppercase tracking-widest">ТТН: {order.ttn}</span>
+                                        </div>
+                                        <CopyButton value={order.ttn} />
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
 
                           {isAdmin && order.status !== 'cancelled' && order.status !== 'completed' && (
-                            <div className="pt-6 border-t border-bottle/5 flex justify-end gap-3">
-                              {order.status !== 'confirmed' && (
-                                <button 
-                                  onClick={(e) => { e.stopPropagation(); handleConfirmOrder(order.id); }}
-                                  className="text-[10px] uppercase tracking-widest font-bold text-green-600 hover:text-green-700 transition-colors flex items-center gap-2 border border-green-100 px-4 py-2 rounded-sm bg-green-50/30"
-                                >
-                                  <CheckCircle2 className="w-4 h-4" />
-                                  Підтвердити замовлення
-                                </button>
-                              )}
-                              <button 
-                                onClick={(e) => { e.stopPropagation(); handleCancelOrder(order.id); }}
-                                className="text-[10px] uppercase tracking-widest font-bold text-red-500 hover:text-red-700 transition-colors flex items-center gap-2 border border-red-100 px-4 py-2 rounded-sm bg-red-50/30"
-                              >
-                                <XCircle className="w-4 h-4" />
-                                Скасувати замовлення
-                              </button>
+                            <div className="pt-6 border-t border-bottle/5 space-y-6">
+                              {/* Admin Action Forms */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {(order.status === 'awaiting_payment' || order.status === 'pending') && (
+                                  <div className="space-y-2">
+                                    <label className="text-[9px] uppercase tracking-widest font-bold text-bottle/40">Отримана оплата (₴)</label>
+                                    <div className="flex gap-2">
+                                      <input 
+                                        type="number" 
+                                        value={adminPaidAmount}
+                                        onChange={(e) => setAdminPaidAmount(e.target.value)}
+                                        placeholder="Напр: 200"
+                                        className="flex-grow border border-bottle/10 px-3 py-2 text-xs focus:border-bottle focus:outline-none"
+                                      />
+                                      <button 
+                                        onClick={() => handleConfirmOrder(order.id)}
+                                        className="bg-green-600 text-white px-4 py-2 text-[10px] font-bold uppercase tracking-widest hover:bg-green-700 transition-colors"
+                                      >
+                                        Підтвердити
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {(order.status === 'confirmed' || order.status === 'packing' || order.status === 'handed_to_delivery') && (
+                                  <div className="space-y-2">
+                                    <label className="text-[9px] uppercase tracking-widest font-bold text-bottle/40">Номер ТТН</label>
+                                    <div className="flex gap-2">
+                                      <input 
+                                        type="text" 
+                                        value={adminTTN}
+                                        onChange={(e) => setAdminTTN(e.target.value)}
+                                        placeholder="204000..."
+                                        className="flex-grow border border-bottle/10 px-3 py-2 text-xs focus:border-bottle focus:outline-none"
+                                      />
+                                      <button 
+                                        onClick={() => {
+                                          if (!adminTTN) return alert('Введіть ТТН');
+                                          handleUpdateOrder(order.id, order.status, { ttn: adminTTN });
+                                          setAdminTTN('');
+                                        }}
+                                        className="bg-blue-600 text-white px-4 py-2 text-[10px] font-bold uppercase tracking-widest hover:bg-blue-700 transition-colors"
+                                      >
+                                        Зберегти
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Status Selection & Actions */}
+                              <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-bottle/5">
+                                <div className="flex items-center gap-3">
+                                  <label className="text-[9px] uppercase tracking-widest font-bold text-bottle/40">Статус:</label>
+                                  <select 
+                                    value={order.status}
+                                    onChange={(e) => handleUpdateOrder(order.id, e.target.value as any)}
+                                    className="bg-white border border-bottle/10 text-[10px] font-bold uppercase tracking-widest px-2 py-1 focus:outline-none focus:border-bottle cursor-pointer"
+                                  >
+                                    <option value="pending">Новий</option>
+                                    <option value="awaiting_payment">Очікує оплати</option>
+                                    <option value="confirmed">Підтверджено</option>
+                                    <option value="packing">Пакування</option>
+                                    <option value="handed_to_delivery">Передано пошті</option>
+                                    <option value="shipped">Надіслано</option>
+                                    <option value="delivered">Отримано</option>
+                                    <option value="completed">Виконано</option>
+                                    <option value="cancelled">Скасовано</option>
+                                  </select>
+                                </div>
+
+                                <div className="flex gap-2">
+                                  <button 
+                                    onClick={() => handleDeleteOrder(order.id)}
+                                    className="text-[9px] uppercase tracking-widest font-bold text-white px-4 py-2 bg-red-600 hover:bg-red-700 transition-colors"
+                                  >
+                                    Видалити
+                                  </button>
+                                  <button 
+                                    onClick={() => handleCancelOrder(order.id)}
+                                    className="text-[9px] uppercase tracking-widest font-bold text-red-500 px-4 py-2 border border-red-100 bg-red-50/30 hover:bg-red-50 transition-colors"
+                                  >
+                                    Скасувати
+                                  </button>
+                                </div>
+                              </div>
                             </div>
                           )}
                         </div>

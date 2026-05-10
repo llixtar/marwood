@@ -233,14 +233,42 @@ async function createMonoInvoice(
    return orders || [];
  }
 
- export async function updateOrderStatus(orderId: string, status: string) {
+ export async function updateOrderStatus(
+   orderId: string, 
+   status: string, 
+   adminData?: { paidAmount?: number; ttn?: string }
+ ) {
+   const updateData: any = { status };
+   
+   if (adminData) {
+     if (adminData.paidAmount !== undefined) {
+       updateData.paid_amount = Math.round(adminData.paidAmount * 100);
+     }
+     if (adminData.ttn !== undefined) {
+       updateData.ttn = adminData.ttn;
+     }
+   }
+
    const { error } = await supabaseAdmin
      .from('orders')
-     .update({ status })
+     .update(updateData)
      .eq('id', orderId);
  
    if (error) {
      console.error('updateOrderStatus error:', error);
+     return { success: false, error: error.message };
+   }
+   return { success: true };
+ }
+ 
+ export async function deleteOrderAdmin(orderId: string) {
+   const { error } = await supabaseAdmin
+     .from('orders')
+     .delete()
+     .eq('id', orderId);
+ 
+   if (error) {
+     console.error('deleteOrderAdmin error:', error);
      return { success: false, error: error.message };
    }
    return { success: true };
