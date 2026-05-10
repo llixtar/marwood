@@ -25,7 +25,7 @@ type Order = {
   customer_phone?: string;
   customer_email?: string;
   sku?: string;
-  paid_amount?: number;
+  paid_amount: number;
   ttn?: string;
 };
 
@@ -458,9 +458,9 @@ export default function OrdersPage() {
                                 </div>
 
                                 {/* Сплачено / Залишок / ТТН */}
-                                {(order.paid_amount > 0 || order.ttn) && (
+                                {( (order.paid_amount ?? 0) > 0 || order.ttn) && (
                                   <div className="border-t border-bottle/5 p-4 space-y-3 bg-milky/30">
-                                    {order.paid_amount > 0 && (
+                                    {(order.paid_amount ?? 0) > 0 && (
                                       <div className="flex justify-between items-center text-[10px]">
                                         <div className="space-y-0.5">
                                           <p className="text-bottle/40 uppercase tracking-widest font-bold">Оплата</p>
