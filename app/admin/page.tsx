@@ -3,9 +3,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { PackageOpen, Trash2 } from 'lucide-react';
 import { deleteProductAction } from '@/app/actions/products';
+import { ProductSearch } from '@/components/admin/ProductSearch';
 
-export default async function AdminPage({ searchParams }: { searchParams: Promise<{ category?: string; page?: string }> }) {
-  const { category, page: pageParam } = await searchParams;
+export default async function AdminPage({ searchParams }: { searchParams: Promise<{ category?: string; page?: string; q?: string }> }) {
+  const { category, page: pageParam, q } = await searchParams;
   
   const ITEM_PER_PAGE = 16;
   const page = parseInt(pageParam || '1', 10);
@@ -32,6 +33,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
 
   if (category && category !== 'all') {
     query = query.eq('category_slug', category);
+  }
+
+  if (q) {
+    query = query.ilike('sku', `%${q}%`);
   }
 
   // Обчислення пагінації (range)
@@ -61,13 +66,16 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           <p className="text-sm text-bottle/60 uppercase tracking-widest font-medium">Всього в базі: {count || 0}</p>
         </div>
         
-        <Link 
-          href="/admin/products/new" 
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-bottle text-milky hover:bg-bottle/90 uppercase text-xs tracking-widest shadow-md transition-all self-start md:self-auto"
-        >
-          <PackageOpen className="w-4 h-4" />
-          Додати новий
-        </Link>
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+          <ProductSearch />
+          <Link 
+            href="/admin/products/new" 
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-bottle text-milky hover:bg-bottle/90 uppercase text-xs tracking-widest shadow-md transition-all self-stretch md:self-auto"
+          >
+            <PackageOpen className="w-4 h-4" />
+            Додати новий
+          </Link>
+        </div>
       </div>
 
       {/* Фільтрація по категоріям */}
@@ -77,7 +85,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           return (
             <Link 
               key={c.slug} 
-              href={`/admin?category=${c.slug}&page=1`}
+              href={`/admin?category=${c.slug}&page=1${q ? `&q=${q}` : ''}`}
               className={`px-4 py-2 border text-[10px] uppercase tracking-widest whitespace-nowrap transition-colors flex-shrink-0 ${
                 isActive 
                   ? 'bg-bottle text-white border-bottle' 
@@ -95,7 +103,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         {products?.map((product) => (
           <div key={product.id} className="group bg-white border border-black/5 rounded-none shadow-sm hover:shadow-lg transition-all flex flex-col overflow-hidden relative">
             
-            <Link href={`/admin/products/${product.id}`} className="absolute inset-x-0 top-0 bottom-[60px] z-10" />
+            <Link href={`/admin/products/${product.id}?q=${q || ''}&category=${category || 'all'}`} className="absolute inset-x-0 top-0 bottom-[60px] z-10" />
 
             {/* Фото */}
             <div className="relative w-full aspect-[3/4] bg-[#f8f8f8] overflow-hidden border-b border-black/5 flex-shrink-0">
@@ -200,7 +208,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <div className="flex justify-center items-center gap-4 mt-12">
           {page > 1 ? (
             <Link 
-              href={`/admin?category=${category || 'all'}&page=${page - 1}`} 
+              href={`/admin?category=${category || 'all'}&page=${page - 1}${q ? `&q=${q}` : ''}`} 
               className="px-4 py-2 border border-black/10 hover:bg-gray-50 text-[10px] uppercase tracking-widest transition-colors"
             >
               ← Попередня
@@ -217,7 +225,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
 
           {page < totalPages ? (
             <Link 
-              href={`/admin?category=${category || 'all'}&page=${page + 1}`} 
+              href={`/admin?category=${category || 'all'}&page=${page + 1}${q ? `&q=${q}` : ''}`} 
               className="px-4 py-2 border border-black/10 hover:bg-gray-50 text-[10px] uppercase tracking-widest transition-colors"
             >
               Наступна →

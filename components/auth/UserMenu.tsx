@@ -5,12 +5,16 @@ import Link from 'next/link';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useCartStore } from '@/lib/store/cartStore';
 import { useWishlistStore } from '@/lib/store/wishlistStore';
-import { User, Package, Settings, LogOut, ChevronDown } from 'lucide-react';
+import { User, Package, Settings, LogOut, ChevronDown, Bell } from 'lucide-react';
+import { getNewOrdersCount } from '@/app/actions/orders';
 
 export function UserMenu() {
   const { user, profile, signOut } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
+  const [newOrdersCount, setNewOrdersCount] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const isAdmin = profile?.is_admin === true;
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -21,6 +25,31 @@ export function UserMenu() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    async function fetchCount() {
+      if (isAdmin) {
+        const count = await getNewOrdersCount();
+        setNewOrdersCount(count);
+      } else {
+        setNewOrdersCount(0);
+      }
+    }
+
+    fetchCount();
+
+    // Слухаємо подію оновлення
+    const handleRefresh = () => fetchCount();
+    window.addEventListener('refresh-orders-count', handleRefresh);
+
+    // Періодичне оновлення (раз на 2 хвилини)
+    const interval = setInterval(fetchCount, 120000);
+
+    return () => {
+      window.removeEventListener('refresh-orders-count', handleRefresh);
+      clearInterval(interval);
+    };
+  }, [isAdmin]);
 
   if (!user) return null;
 
@@ -44,8 +73,11 @@ export function UserMenu() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-1.5 text-bottle hover:bg-bottle/5 px-2 py-1.5 rounded transition-colors"
       >
-        <div className="w-7 h-7 rounded-full bg-bottle text-milky flex items-center justify-center text-[10px] font-bold">
+        <div className="w-7 h-7 rounded-full bg-bottle text-milky flex items-center justify-center text-[10px] font-bold relative">
           {initials}
+          {isAdmin && newOrdersCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 border border-white rounded-full animate-pulse" />
+          )}
         </div>
         <span className="text-[10px] font-bold uppercase tracking-wider hidden lg:inline max-w-[100px] truncate">
           {displayName.split(' ')[0]}
@@ -79,10 +111,17 @@ export function UserMenu() {
             <Link
               href="/account/orders"
               onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 px-4 py-2.5 text-xs text-bottle hover:bg-bottle/5 transition-colors"
+              className="flex items-center gap-3 px-4 py-2.5 text-xs text-bottle hover:bg-bottle/5 transition-colors group/item"
             >
               <Package className="w-4 h-4 text-bottle/40" />
-              Мої замовлення
+              <div className="flex items-center justify-between flex-1">
+                <span>{isAdmin ? 'Замовлення' : 'Мої замовлення'}</span>
+                {isAdmin && newOrdersCount > 0 && (
+                  <span className="bg-red-500 text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold">
+                    {newOrdersCount}
+                  </span>
+                )}
+              </div>
             </Link>
           </div>
 

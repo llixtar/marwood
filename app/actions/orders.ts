@@ -23,7 +23,7 @@ export type OrderFormData = {
   warehouse?: string;
   warehouseRef?: string;
   address?: string;
-  paymentMethod: 'monopay' | 'cod';
+  paymentMethod: 'monopay' | 'details_full' | 'details_cod';
   comment?: string;
   items: {
     id: string;
@@ -47,8 +47,8 @@ export async function createOrderAction(data: OrderFormData) {
       return sum + price * item.quantity;
     }, 0);
 
-    const shippingCost = 0; // Безкоштовна доставка від 2000 ₴
-    const total = subtotal + shippingCost;
+    const shippingCost = 0;
+    const total = subtotal;
 
     // Визначаємо клієнта (зареєстрований або гість)
     const user = await getCurrentUser();
@@ -88,7 +88,7 @@ export async function createOrderAction(data: OrderFormData) {
         p_address: data.address || null,
         p_payment_method: data.paymentMethod,
         p_payment_status: 'pending',
-        p_status: 'pending',
+        p_status: data.paymentMethod.startsWith('details') ? 'awaiting_payment' : 'pending',
         p_items: data.items,
         p_subtotal: Math.round(subtotal * 100),
         p_shipping_cost: Math.round(shippingCost * 100),
@@ -244,4 +244,17 @@ async function createMonoInvoice(
      return { success: false, error: error.message };
    }
    return { success: true };
+ }
+ 
+ export async function getNewOrdersCount() {
+   const { count, error } = await supabaseAdmin
+     .from('orders')
+     .select('*', { count: 'exact', head: true })
+     .in('status', ['pending', 'awaiting_payment']);
+ 
+   if (error) {
+     console.error('getNewOrdersCount error:', error);
+     return 0;
+   }
+   return count || 0;
  }

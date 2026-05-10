@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 type DeliveryMethod = 'nova_poshta_warehouse' | 'nova_poshta_courier';
-type PaymentMethod = 'monopay' | 'cod';
+type PaymentMethod = 'monopay' | 'details_full' | 'details_cod';
 
 export function CheckoutForm() {
   const router = useRouter();
@@ -78,8 +78,7 @@ export function CheckoutForm() {
   if (!mounted) return null;
 
   const total = orderItems.reduce((sum, i) => sum + (i.discount_price ?? i.price) * i.quantity, 0);
-  const codPrepaymentThreshold = 500;
-  const codPrepaymentRequired = paymentMethod === 'cod' && total > codPrepaymentThreshold;
+  const codPrepaymentRequired = paymentMethod === 'details_cod';
 
   const formatPhone = (value: string) => {
     const digits = value.replace(/\D/g, '');
@@ -415,37 +414,72 @@ export function CheckoutForm() {
               }`}
             >
               <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-xs font-bold">mono</span>
+                <span className="text-white text-[10px] font-bold">mono</span>
               </div>
               <div>
-                <span className="text-xs font-bold text-bottle block">Оплата онлайн</span>
-                <span className="text-[10px] text-bottle/50">MonoPay — Visa, Mastercard, Apple Pay, Google Pay</span>
+                <span className="text-xs font-bold text-bottle block">Онлайн-оплата (MonoPay)</span>
+                <span className="text-[10px] text-bottle/50">Visa, Mastercard, Apple Pay, Google Pay</span>
               </div>
             </button>
 
-            <button
-              type="button"
-              onClick={() => setPaymentMethod('cod')}
-              className={`w-full p-4 border text-left transition-all flex items-center gap-4 ${
-                paymentMethod === 'cod'
-                  ? 'border-bottle bg-bottle/5'
-                  : 'border-bottle/15 hover:border-bottle/30'
-              }`}
-            >
-              <div className="w-10 h-10 rounded-full bg-bottle/10 flex items-center justify-center flex-shrink-0">
-                <Package className="w-5 h-5 text-bottle/60" />
-              </div>
-              <div>
-                <span className="text-xs font-bold text-bottle block">Наложений платіж</span>
-                <span className="text-[10px] text-bottle/50">Оплата при отриманні (+ комісія НП)</span>
-              </div>
-            </button>
+            <div className={`border transition-all ${
+              paymentMethod.startsWith('details')
+                ? 'border-bottle bg-bottle/5'
+                : 'border-bottle/15'
+            }`}>
+              <button
+                type="button"
+                onClick={() => setPaymentMethod('details_full')}
+                className="w-full p-4 text-left flex items-center gap-4"
+              >
+                <div className="w-10 h-10 rounded-full bg-bottle/10 flex items-center justify-center flex-shrink-0">
+                  <CreditCard className="w-5 h-5 text-bottle/60" />
+                </div>
+                <div>
+                  <span className="text-xs font-bold text-bottle block">Оплата за реквізитами</span>
+                  <span className="text-[10px] text-bottle/50">Прямий переказ на рахунок ФОП</span>
+                </div>
+              </button>
+
+              {paymentMethod.startsWith('details') && (
+                <div className="px-14 pb-4 space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('details_full')}
+                    className="flex items-center gap-3 group"
+                  >
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
+                      paymentMethod === 'details_full' ? 'border-bottle bg-bottle' : 'border-bottle/30'
+                    }`}>
+                      {paymentMethod === 'details_full' && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                    </div>
+                    <span className={`text-[11px] uppercase tracking-wider font-bold ${
+                      paymentMethod === 'details_full' ? 'text-bottle' : 'text-bottle/40'
+                    }`}>Повна оплата</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('details_cod')}
+                    className="flex items-center gap-3 group"
+                  >
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
+                      paymentMethod === 'details_cod' ? 'border-bottle bg-bottle' : 'border-bottle/30'
+                    }`}>
+                      {paymentMethod === 'details_cod' && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                    </div>
+                    <span className={`text-[11px] uppercase tracking-wider font-bold ${
+                      paymentMethod === 'details_cod' ? 'text-bottle' : 'text-bottle/40'
+                    }`}>Наложений платіж (200 ₴ передоплата)</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {codPrepaymentRequired && (
             <div className="bg-amber-50 border border-amber-200 px-4 py-3 text-xs text-amber-700">
-              <strong>Увага:</strong> Для замовлень понад {codPrepaymentThreshold} ₴ потрібна передоплата 200 ₴ для підтвердження.
-              Ми зв&apos;яжемось з вами для уточнення.
+              <strong>Увага:</strong> Для наложеного платежу потрібна передоплата 200 ₴ на рахунок ФОП для підтвердження замовлення.
+              Реквізити будуть надані на наступному кроці.
             </div>
           )}
 

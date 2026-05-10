@@ -28,9 +28,13 @@ type ManagedImage = {
 
 type ProductFormProps = {
   initialData?: any;
+  returnParams?: {
+    q?: string;
+    category?: string;
+  };
 };
 
-export function ProductForm({ initialData }: ProductFormProps) {
+export function ProductForm({ initialData, returnParams }: ProductFormProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
@@ -149,7 +153,12 @@ export function ProductForm({ initialData }: ProductFormProps) {
         }
 
         if (result.success) {
-          router.push('/admin');
+          const params = new URLSearchParams();
+          if (returnParams?.q) params.set('q', returnParams.q);
+          if (returnParams?.category) params.set('category', returnParams.category);
+          
+          const queryString = params.toString();
+          router.push(`/admin${queryString ? `?${queryString}` : ''}`);
         } else {
           alert('Сталася помилка: ' + result.error);
         }
@@ -163,7 +172,10 @@ export function ProductForm({ initialData }: ProductFormProps) {
     <div className="max-w-5xl mx-auto pb-12">
       <div className="mb-6 flex justify-between items-end">
         <div>
-          <Link href="/admin" className="text-[10px] uppercase tracking-widest text-bottle/50 hover:text-bottle transition-colors mb-2 inline-block">
+          <Link 
+            href={`/admin${returnParams?.q || returnParams?.category ? `?q=${returnParams.q || ''}&category=${returnParams.category || 'all'}` : ''}`} 
+            className="text-[10px] uppercase tracking-widest text-bottle/50 hover:text-bottle transition-colors mb-2 inline-block"
+          >
             ← Назад до списку
           </Link>
           <h1 className="text-2xl font-light text-bottle uppercase tracking-widest flex items-center gap-2">

@@ -73,7 +73,7 @@ export function Header() {
                       <SheetClose asChild><Link href="/category/robes" className="text-base text-bottle/80 hover:text-bottle">Халати</Link></SheetClose>
                       <SheetClose asChild><Link href="/category/pajamas" className="text-base text-bottle/80 hover:text-bottle">Піжами</Link></SheetClose>
                       <SheetClose asChild><Link href="/category/body" className="text-base text-bottle/80 hover:text-bottle">Боді</Link></SheetClose>
-                      
+
                       <SheetClose asChild><Link href="/category/swimwear" className="text-base text-bottle/80 hover:text-bottle">Купальники</Link></SheetClose>
 
                       {/* Плюс сайз з підкатегоріями */}
@@ -93,8 +93,8 @@ export function Header() {
                   {/* АКЦІЇ */}
                   <div className="py-2">
                     <SheetClose asChild>
-                      <Link 
-                        href="/#sale" 
+                      <Link
+                        href="/#sale"
                         onClick={() => {
                           if (window.location.pathname === '/') {
                             setTimeout(() => {
@@ -154,7 +154,7 @@ export function Header() {
                       <li><NavigationMenuLink asChild><Link href="/category/robes" onClick={handleLinkClick} className="block px-4 py-2 hover:bg-bottle hover:text-white text-bottle rounded-xl transition-all text-sm font-medium">Халати</Link></NavigationMenuLink></li>
                       <li><NavigationMenuLink asChild><Link href="/category/pajamas" onClick={handleLinkClick} className="block px-4 py-2 hover:bg-bottle hover:text-white text-bottle rounded-xl transition-all text-sm font-medium">Піжами</Link></NavigationMenuLink></li>
                       <li><NavigationMenuLink asChild><Link href="/category/body" onClick={handleLinkClick} className="block px-4 py-2 hover:bg-bottle hover:text-white text-bottle rounded-xl transition-all text-sm font-medium">Боді</Link></NavigationMenuLink></li>
-                      
+
                       <li><NavigationMenuLink asChild><Link href="/category/swimwear" onClick={handleLinkClick} className="block px-4 py-2 hover:bg-bottle hover:text-white text-bottle rounded-xl transition-all text-sm font-medium">Купальники</Link></NavigationMenuLink></li>
 
                       {/* Плюс сайз з підкатегоріями */}
@@ -200,8 +200,8 @@ export function Header() {
 
                 <NavigationMenuItem>
                   <NavigationMenuLink asChild className={`${navigationMenuTriggerStyle()} !bg-transparent !text-bottle hover:!bg-bottle/5 font-heading font-bold uppercase text-[10px] tracking-[0.2em]`}>
-                    <Link 
-                      href="/#sale" 
+                    <Link
+                      href="/#sale"
                       onClick={() => {
                         handleLinkClick();
                         // Якщо ми вже на головній, примусово викликаємо подію зміни хешу

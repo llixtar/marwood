@@ -43,11 +43,13 @@ export default function OrdersPage() {
           data = await getAllOrdersAdmin();
           
           if (data) {
-            data.sort((a: any, b: any) => {
-              if (a.payment_method === 'cod' && b.payment_method !== 'cod') return -1;
-              if (a.payment_method !== 'cod' && b.payment_method === 'cod') return 1;
-              return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-            });
+          data.sort((a: any, b: any) => {
+            const priority = (method: string) => method.startsWith('details') ? 0 : 1;
+            if (priority(a.payment_method) !== priority(b.payment_method)) {
+              return priority(a.payment_method) - priority(b.payment_method);
+            }
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          });
           }
         } else {
           data = await getCustomerOrders(user.id);
@@ -74,6 +76,8 @@ export default function OrdersPage() {
       if (selectedOrder?.id === orderId) {
         setSelectedOrder({ ...selectedOrder, status: 'cancelled' });
       }
+      // Оновлюємо лічильник у хедері
+      window.dispatchEvent(new CustomEvent('refresh-orders-count'));
     } else {
       alert('Помилка при скасуванні замовлення');
     }
@@ -88,6 +92,8 @@ export default function OrdersPage() {
       if (selectedOrder?.id === orderId) {
         setSelectedOrder({ ...selectedOrder, status: 'confirmed' });
       }
+      // Оновлюємо лічильник у хедері
+      window.dispatchEvent(new CustomEvent('refresh-orders-count'));
     } else {
       alert('Помилка при підтвердженні замовлення');
     }
@@ -130,8 +136,8 @@ export default function OrdersPage() {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'pending': return 'Очікує підтвердження';
-      case 'awaiting_payment': return 'Очікує передоплати';
+      case 'pending': return 'Очікує (MonoPay)';
+      case 'awaiting_payment': return 'Очікує оплати (Реквізити)';
       case 'confirmed': return 'Підтверджено';
       case 'shipped': return 'Відправлено';
       case 'completed': return 'Виконано';
@@ -367,7 +373,10 @@ export default function OrdersPage() {
                                   <div>
                                     <p className="text-[10px] uppercase tracking-tighter text-bottle/40 font-bold">Метод та статус</p>
                                     <p className="text-xs text-bottle mt-1">
-                                      {order.payment_method === 'monopay' ? 'MonoPay' : 'Наложений платіж'}<br />
+                                      {order.payment_method === 'monopay' && 'Онлайн (MonoPay)'}
+                                      {order.payment_method === 'details_full' && 'Реквізити (Повна)'}
+                                      {order.payment_method === 'details_cod' && 'Реквізити (Наложений)'}
+                                      <br />
                                       <span className={`text-[10px] font-bold uppercase ${order.payment_status === 'paid' ? 'text-green-600' : 'text-yellow-600'}`}>
                                         {order.payment_status === 'paid' ? 'Сплачено' : 'Очікує оплати'}
                                       </span>

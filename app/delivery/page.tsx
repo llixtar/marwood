@@ -41,15 +41,17 @@ export default function DeliveryPage() {
                     <p>Адресна доставка кур&apos;єром Нової Пошти до ваших дверей.</p>
                   </div>
                 </li>
-                <li className="flex gap-4">
-                  <span className="text-bottle">•</span>
-                  <div className="p-4 bg-bottle/5 border-l-2 border-bottle">
-                    <p className="font-bold text-bottle uppercase text-xs tracking-widest mb-1">Безкоштовна доставка</p>
-                    <p>При замовленні на суму від <strong>2000 ₴</strong> доставка до відділення — безкоштовна.</p>
-                  </div>
-                </li>
               </ul>
-              <p className="text-sm italic">Відправки здійснюються зі складів у с. Шаровечка (Хмельницька обл.) або м. Луцьк щодня, окрім неділі. Самовивозу немає.</p>
+
+              <div className="p-6 bg-bottle/5 border-l-4 border-bottle mt-8">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="font-bold text-bottle uppercase text-xs tracking-widest">Безкоштовна доставка</span>
+                  <span className="px-2 py-0.5 bg-bottle text-milky text-[8px] font-bold uppercase tracking-tighter rounded-full">Акція</span>
+                </div>
+                <p className="text-sm">При замовленні на суму від <strong>2000 ₴</strong> доставка до будь-якого відділення Нової Пошти — <strong>безкоштовна</strong>.</p>
+              </div>
+
+              <p className="text-sm italic pt-4">Відправки здійснюються зі складів у с. Шаровечка (Хмельницька обл.) або м. Луцьк щодня, окрім неділі. Самовивозу немає.</p>
             </div>
           </section>
 

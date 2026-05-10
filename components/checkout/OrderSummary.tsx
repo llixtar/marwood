@@ -47,8 +47,7 @@ export function OrderSummary() {
   const total = displayedItems.reduce((sum, i) => sum + (i.discount_price ?? i.price) * i.quantity, 0);
   const count = displayedItems.reduce((sum, i) => sum + i.quantity, 0);
   const freeShippingThreshold = 2000;
-  const shippingCost = total >= freeShippingThreshold ? 0 : 70;
-  const finalTotal = total + shippingCost;
+  const finalTotal = total;
 
   return (
     <div className="bg-white border border-bottle/10 sticky top-20">
@@ -157,8 +156,8 @@ export function OrderSummary() {
         </div>
         <div className="flex justify-between text-xs text-bottle/60">
           <span>Доставка</span>
-          <span className={`font-mono ${shippingCost === 0 ? 'text-green-600 font-bold' : ''}`}>
-            {shippingCost === 0 ? 'Безкоштовно' : `${shippingCost} ₴`}
+          <span className={`font-bold ${total >= freeShippingThreshold ? 'text-green-600' : 'text-[10px] uppercase tracking-tighter'}`}>
+            {total >= freeShippingThreshold ? 'Безкоштовно' : 'за тарифами НП'}
           </span>
         </div>
 
@@ -174,9 +173,14 @@ export function OrderSummary() {
           <span className="text-xs uppercase tracking-widest text-bottle/50 font-mono">
             Разом:
           </span>
-          <span className="text-xl font-bold text-bottle">
-            {finalTotal.toLocaleString('uk-UA')} ₴
-          </span>
+          <div className="text-right">
+            <span className="text-xl font-bold text-bottle">
+              {finalTotal.toLocaleString('uk-UA')} ₴
+            </span>
+            <p className="text-[10px] text-bottle/40 -mt-1 font-medium">
+              + послуги Нової пошти
+            </p>
+          </div>
         </div>
       </div>
 
