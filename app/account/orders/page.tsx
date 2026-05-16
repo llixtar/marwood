@@ -168,9 +168,12 @@ export default function OrdersPage() {
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'pending': return 'Очікує (MonoPay)';
+  const getStatusLabel = (order: Order) => {
+    const isPaid = order.payment_status === 'success' || (order.paid_amount ?? 0) >= order.total;
+    
+    switch (order.status) {
+      case 'pending': 
+        return isPaid ? 'СПЛАЧЕНО (MonoPay)' : 'Очікує (MonoPay)';
       case 'awaiting_payment': return 'Очікує оплати (Реквізити)';
       case 'confirmed': return 'Підтверджено / Оплачено';
       case 'packing': return 'Пакування';
@@ -328,7 +331,7 @@ export default function OrdersPage() {
 
                         <div className="flex flex-wrap items-center gap-3 ml-auto">
                           <div className={`text-[9px] uppercase tracking-widest font-bold px-3 py-1 border rounded-full ${getStatusColor(order.status)}`}>
-                            {getStatusLabel(order.status)}
+                            {getStatusLabel(order)}
                           </div>
                           <div className="text-sm font-light text-bottle">
                             {isAdmin ? (

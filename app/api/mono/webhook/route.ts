@@ -30,10 +30,10 @@ export async function POST(request: NextRequest) {
       updated_at: new Date().toISOString(),
     };
 
-    // Якщо оплата успішна — оновлюємо статус оплати, але залишаємо статус замовлення "pending" 
-    // щоб адмін бачив його у вкладці "Нові" і міг підтвердити вручну
+    // Якщо оплата успішна — оновлюємо статус оплати та суму
     if (paymentStatus === 'success') {
-      // status залишається без змін (pending)
+      updateData.payment_status = 'success';
+      updateData.paid_amount = amount; // сума в копійках від банку
     }
 
     // Якщо оплата провалена — скасовуємо
