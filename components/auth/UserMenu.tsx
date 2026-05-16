@@ -32,6 +32,7 @@ export function UserMenu() {
       if (isAdmin) {
         const count = await getNewOrdersCount();
         setAdminCount(count);
+        setCustomerStats({ unpaid: 0, updated: 0 }); // Адмін не бачить своїх клієнтських статів
       } else if (user) {
         const stats = await getCustomerOrderStats(user.id);
         setCustomerStats(stats);
