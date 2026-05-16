@@ -28,6 +28,7 @@ type Order = {
   sku?: string;
   paid_amount: number;
   ttn?: string;
+  updated_at: string;
 };
 
 export default function OrdersPage() {
