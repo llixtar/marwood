@@ -3,12 +3,13 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import Image from 'next/image';
 import { ShoppingCart, Heart, ShieldCheck, Ruler, Truck, ChevronLeft, ChevronRight, Maximize2, X, ArrowRight } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { useCartStore } from '@/lib/store/cartStore';
 import { useWishlistStore } from '@/lib/store/wishlistStore';
 import { useAuthStore } from '@/lib/store/authStore';
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, type CarouselApi } from '@/components/ui/carousel';
 
 type ProductQuickViewProps = {
   product: any;
@@ -23,6 +24,7 @@ export function ProductQuickView({ product: initialProduct, isOpen, onClose }: P
 
   const product = currentProduct || initialProduct;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [api, setApi] = useState<CarouselApi>();
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [showToast, setShowToast] = useState('');
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -86,6 +88,24 @@ export function ProductQuickView({ product: initialProduct, isOpen, onClose }: P
       fetchVariants();
     }
   }, [isOpen, product?.sku]);
+  
+  // Синхронізація індексу каруселі
+  useEffect(() => {
+    if (!api) return;
+    
+    setCurrentImageIndex(api.selectedScrollSnap());
+    
+    api.on("select", () => {
+      setCurrentImageIndex(api.selectedScrollSnap());
+    });
+  }, [api]);
+
+  // Скидання каруселі при відкритті нового товару
+  useEffect(() => {
+    if (isOpen && api) {
+      api.scrollTo(0);
+    }
+  }, [isOpen, api, product?.id]);
 
   const { addItem, openCart, items } = useCartStore();
   const { toggleItem, isInWishlist } = useWishlistStore();
@@ -200,44 +220,57 @@ export function ProductQuickView({ product: initialProduct, isOpen, onClose }: P
           {/* Слайдер Фотографій */}
           <div className="relative w-full aspect-[3/4] bg-bottle/5 select-none overflow-hidden group">
             {product.images && product.images.length > 0 ? (
-              <>
-                <Image 
-                  src={product.images[currentImageIndex]} 
-                  alt={product.title} 
-                  fill 
-                  className="object-cover cursor-zoom-in"
-                  priority
-                  onClick={() => setIsLightboxOpen(true)}
-                />
+              <Carousel 
+                setApi={setApi}
+                opts={{
+                  loop: true,
+                  duration: 20, // Швидше перемикання
+                }}
+                className="w-full h-full"
+              >
+                <CarouselContent className="h-full w-full ml-0" containerClassName="h-full w-full">
+                  {product.images.map((img: string, idx: number) => (
+                    <CarouselItem key={idx} className="relative w-full h-full pl-0 flex-shrink-0 flex-grow-0 basis-full">
+                      <Image 
+                        src={img} 
+                        alt={`${product.title} - ${idx + 1}`} 
+                        fill 
+                        className="object-cover cursor-zoom-in"
+                        priority={idx === 0}
+                        onClick={() => setIsLightboxOpen(true)}
+                      />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
                 
-                {/* Навігація по фотострілками */}
+                {/* Навігація */}
                 {product.images.length > 1 && (
                   <>
                     <button 
-                      onClick={() => setCurrentImageIndex(prev => prev === 0 ? product.images.length - 1 : prev - 1)}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 p-2 text-bottle hover:bg-white transition-colors z-20 opacity-0 group-hover:opacity-100"
+                      onClick={() => api?.scrollPrev()}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-3 text-bottle hover:bg-white transition-all z-20 opacity-0 group-hover:opacity-100 shadow-sm active:scale-95"
                     >
                       <ChevronLeft className="w-5 h-5" />
                     </button>
                     <button 
-                      onClick={() => setCurrentImageIndex(prev => prev === product.images.length - 1 ? 0 : prev + 1)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 p-2 text-bottle hover:bg-white transition-colors z-20 opacity-0 group-hover:opacity-100"
+                      onClick={() => api?.scrollNext()}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-3 text-bottle hover:bg-white transition-all z-20 opacity-0 group-hover:opacity-100 shadow-sm active:scale-95"
                     >
                       <ChevronRight className="w-5 h-5" />
                     </button>
 
-                    <div className="absolute inset-x-0 bottom-4 flex justify-center gap-2 z-20">
+                    <div className="absolute inset-x-0 bottom-6 flex justify-center gap-2.5 z-20">
                       {product.images.map((_: any, idx: number) => (
-                         <div 
+                         <button 
                            key={idx} 
-                           onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(idx); }}
-                           className={`h-1 cursor-pointer transition-all ${idx === currentImageIndex ? 'w-6 bg-white shadow-sm' : 'w-2 bg-white/50 hover:bg-white/80'}`} 
+                           onClick={(e) => { e.stopPropagation(); api?.scrollTo(idx); }}
+                           className={`h-1 rounded-full transition-all duration-300 ${idx === currentImageIndex ? 'w-8 bg-white shadow-md' : 'w-2 bg-white/40 hover:bg-white/60'}`} 
                          />
                       ))}
                     </div>
                   </>
                 )}
-              </>
+              </Carousel>
             ) : (
               <div className="w-full h-full flex items-center justify-center text-bottle/20 uppercase tracking-widest text-xs">Немає фото</div>
             )}
@@ -438,24 +471,7 @@ export function ProductQuickView({ product: initialProduct, isOpen, onClose }: P
 
         {/* --- LIGHTBOX (Повний екран) --- */}
         {isLightboxOpen && product.images.length > 0 && (
-          <div 
-            className="fixed inset-0 z-[200] bg-black/95 flex flex-col animate-in fade-in"
-            onTouchStart={(e) => {
-              touchStartX.current = e.touches[0].clientX;
-            }}
-            onTouchEnd={(e) => {
-              if (touchStartX.current === null) return;
-              const touchEndX = e.changedTouches[0].clientX;
-              const diff = touchStartX.current - touchEndX;
-              
-              if (diff > 50) {
-                setCurrentImageIndex(prev => prev === product.images.length - 1 ? 0 : prev + 1);
-              } else if (diff < -50) {
-                setCurrentImageIndex(prev => prev === 0 ? product.images.length - 1 : prev - 1);
-              }
-              touchStartX.current = null;
-            }}
-          >
+          <div className="fixed inset-0 z-[200] bg-black/95 flex flex-col animate-in fade-in">
             <div className="absolute top-0 inset-x-0 p-4 flex justify-between items-center z-[210] bg-gradient-to-b from-black/80 to-transparent">
               <span className="text-white/70 text-xs uppercase tracking-widest font-mono">
                 {currentImageIndex + 1} / {product.images.length}
@@ -465,32 +481,50 @@ export function ProductQuickView({ product: initialProduct, isOpen, onClose }: P
               </button>
             </div>
             
-            <div className="flex-1 relative flex items-center justify-center">
-              <Image 
-                src={product.images[currentImageIndex]} 
-                alt={product.title} 
-                fill 
-                className="object-contain"
-                priority
-              />
-            </div>
+            <div className="flex-1 relative flex items-center justify-center overflow-hidden">
+              <Carousel 
+                opts={{
+                  loop: true,
+                  duration: 25,
+                  startIndex: currentImageIndex,
+                }}
+                setApi={(lightboxApi) => {
+                  lightboxApi?.on("select", () => {
+                    const newIndex = lightboxApi.selectedScrollSnap();
+                    setCurrentImageIndex(newIndex);
+                    api?.scrollTo(newIndex, true); // Синхронізація з основною галереєю
+                  });
+                }}
+                className="w-full h-full"
+              >
+                <CarouselContent className="h-full w-full ml-0" containerClassName="h-full w-full">
+                  {product.images.map((img: string, idx: number) => (
+                    <CarouselItem key={idx} className="relative w-full h-full pl-0 flex items-center justify-center flex-shrink-0 flex-grow-0 basis-full">
+                      <div className="relative w-full h-[80vh]">
+                        <Image 
+                          src={img} 
+                          alt={`${product.title} - ${idx + 1}`} 
+                          fill 
+                          className="object-contain"
+                          priority
+                        />
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
 
-            {product.images.length > 1 && (
-              <>
-                <button 
-                  onClick={() => setCurrentImageIndex(prev => prev === 0 ? product.images.length - 1 : prev - 1)}
-                  className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors p-4 z-[210] bg-black/20 hover:bg-black/50"
-                >
-                  <ChevronLeft className="w-10 h-10" />
-                </button>
-                <button 
-                  onClick={() => setCurrentImageIndex(prev => prev === product.images.length - 1 ? 0 : prev + 1)}
-                  className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors p-4 z-[210] bg-black/20 hover:bg-black/50"
-                >
-                  <ChevronRight className="w-10 h-10" />
-                </button>
-              </>
-            )}
+                {product.images.length > 1 && (
+                  <>
+                    <div className="hidden md:block absolute left-4 top-1/2 -translate-y-1/2">
+                      <CarouselPrevious className="relative left-0 translate-y-0 bg-white/10 border-white/20 text-white hover:bg-white/20" />
+                    </div>
+                    <div className="hidden md:block absolute right-4 top-1/2 -translate-y-1/2">
+                      <CarouselNext className="relative right-0 translate-y-0 bg-white/10 border-white/20 text-white hover:bg-white/20" />
+                    </div>
+                  </>
+                )}
+              </Carousel>
+            </div>
           </div>
         )}
 

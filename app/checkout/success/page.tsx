@@ -1,35 +1,42 @@
 import Link from 'next/link';
 import { CheckCircle2, Package, ArrowRight, Phone } from 'lucide-react';
 import type { Metadata } from 'next';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase/server';
 import { CopyButton } from '@/components/checkout/CopyButton';
+import { PaymentDetails } from '@/components/checkout/PaymentDetails';
 
 export const metadata: Metadata = {
   title: 'Замовлення прийнято — Marwood',
   description: 'Дякуємо за ваше замовлення в Marwood!',
 };
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+export const dynamic = 'force-dynamic';
 
 export default async function CheckoutSuccessPage({
   searchParams,
 }: {
-  searchParams: Promise<{ order?: string }>;
+  searchParams: Promise<{ order?: string; method?: string; total?: string }>;
 }) {
-  const { order: orderNumber } = await searchParams;
+  const { order: orderNumber, method, total } = await searchParams;
 
   let orderData = null;
   if (orderNumber) {
-    const { data } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from('orders')
       .select('*')
       .eq('order_number', orderNumber)
       .single();
+      
+    if (error) {
+      console.error('Error fetching order for success page:', error);
+    }
     orderData = data;
   }
+
+  // Use DB data if available, otherwise fallback to URL params
+  const paymentMethod = orderData?.payment_method || method;
+  const totalAmount = orderData?.total || (total ? parseInt(total, 10) : 0);
+  const showPaymentDetails = paymentMethod === 'details_full' || paymentMethod === 'details_cod';
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 py-8">
@@ -56,65 +63,25 @@ export default async function CheckoutSuccessPage({
         {/* Номер замовлення та Реквізити */}
         {orderNumber && (
           <div className="space-y-3">
-            <div className="bg-white border border-bottle/10 p-4 space-y-2">
-              <div className="flex items-center justify-center gap-2 text-[9px] uppercase tracking-widest text-bottle/50">
+            <div className="bg-bottle text-milky p-6 space-y-3 shadow-lg">
+              <div className="flex items-center justify-center gap-2 text-[9px] uppercase tracking-widest text-milky/50 font-bold">
                 <Package className="w-3 h-3" />
                 Номер замовлення
               </div>
-              <div className="flex items-center justify-center gap-2">
-                <p className="text-xl font-bold text-bottle font-mono tracking-wider">
+              <div className="flex items-center justify-center gap-3">
+                <p className="text-2xl font-bold font-mono tracking-wider">
                   {orderNumber}
                 </p>
                 <CopyButton value={orderNumber} label="номер замовлення" />
               </div>
             </div>
 
-            {orderData && (orderData.payment_method === 'details_full' || orderData.payment_method === 'details_cod') && (
-              <div className="bg-bottle text-milky p-6 text-left space-y-4">
-                <div className="space-y-1 border-b border-milky/10 pb-3">
-                  <h3 className="text-[10px] font-bold uppercase tracking-widest">Реквізити для оплати</h3>
-                  <p className="text-[9px] opacity-50 leading-tight">
-                    Вкажіть номер <span className="underline">{orderNumber}</span> у коментарі до платежу.
-                  </p>
-                </div>
-
-                <div className="space-y-3 font-mono text-[11px]">
-                  <div>
-                    <p className="opacity-40 text-[8px] uppercase tracking-tighter mb-0.5 font-sans">Отримувач</p>
-                    <p className="font-bold">ФОП [Ваше Ім&apos;я]</p>
-                  </div>
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="flex-1">
-                      <p className="opacity-40 text-[8px] uppercase tracking-tighter mb-0.5 font-sans">IBAN</p>
-                      <div className="flex items-center gap-2">
-                        <p className="font-bold break-all leading-none">UA000000000000000000000000000</p>
-                        <CopyButton value="UA000000000000000000000000000" label="IBAN" />
-                      </div>
-                    </div>
-                    <div>
-                      <p className="opacity-40 text-[8px] uppercase tracking-tighter mb-0.5 font-sans">ЄДРПОУ</p>
-                      <div className="flex items-center gap-2">
-                        <p className="font-bold">12345678</p>
-                        <CopyButton value="12345678" label="ЄДРПОУ" />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="pt-3 flex justify-between items-end border-t border-milky/10">
-                    <div>
-                      <p className="opacity-40 text-[8px] uppercase tracking-tighter mb-0.5 font-sans">Сума до сплати</p>
-                      <p className="text-lg font-bold">
-                        {orderData.payment_method === 'details_cod' ? '200' : (orderData.total / 100).toLocaleString('uk-UA')} ₴
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[8px] opacity-40 uppercase tracking-tighter font-sans">
-                        {orderData.payment_method === 'details_cod' ? 'Передоплата' : 'Повна оплата'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {showPaymentDetails && (
+              <PaymentDetails 
+                orderNumber={orderNumber} 
+                totalAmount={totalAmount} 
+                paymentMethod={paymentMethod}
+              />
             )}
           </div>
         )}

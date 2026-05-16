@@ -6,6 +6,7 @@ import { getCustomerOrders } from '@/app/actions/customers';
 import { getAllOrdersAdmin, updateOrderStatus, deleteOrderAdmin } from '@/app/actions/orders';
 import { Package, Truck, Clock, CheckCircle2, ChevronRight, ShoppingBag, ExternalLink, Search, Mail, Phone, MapPin, CreditCard, User, XCircle, Info } from 'lucide-react';
 import { CopyButton } from '@/components/checkout/CopyButton';
+import { PaymentDetails } from '@/components/checkout/PaymentDetails';
 import Link from 'next/link';
 
 type Order = {
@@ -79,6 +80,7 @@ export default function OrdersPage() {
         ...o, 
         status,
         paid_amount: adminData?.paidAmount !== undefined ? Math.round(adminData.paidAmount * 100) : o.paid_amount,
+        payment_status: (adminData?.paidAmount && adminData.paidAmount > 0) || status === 'confirmed' ? 'success' : o.payment_status,
         ttn: adminData?.ttn !== undefined ? adminData.ttn : o.ttn
       } : o));
       
@@ -87,6 +89,7 @@ export default function OrdersPage() {
           ...prev, 
           status,
           paid_amount: adminData?.paidAmount !== undefined ? Math.round(adminData.paidAmount * 100) : prev.paid_amount,
+          payment_status: (adminData?.paidAmount && adminData.paidAmount > 0) || status === 'confirmed' ? 'success' : prev.payment_status,
           ttn: adminData?.ttn !== undefined ? adminData.ttn : prev.ttn
         } : null);
       }
@@ -349,7 +352,7 @@ export default function OrdersPage() {
                           
                           {/* Items */}
                           <div className="space-y-4">
-                            <h3 className="text-[10px] uppercase tracking-widest font-bold text-bottle/40 mb-3 ml-1">Товари в замовленні</h3>
+                            <h3 className="text-[10px] uppercase tracking-widest font-bold text-bottle/70 mb-3 ml-1">Товари в замовленні</h3>
                             {order.items.map((item: any, idx: number) => (
                               <div key={idx} className="flex items-center gap-4 bg-white p-3 border border-bottle/5 rounded-sm">
                                 <div className="w-16 h-16 bg-milky relative overflow-hidden flex-shrink-0">
@@ -382,17 +385,17 @@ export default function OrdersPage() {
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {isAdmin && (
                               <div className="space-y-4">
-                                <h3 className="text-[10px] uppercase tracking-widest font-bold text-bottle/40 ml-1">Клієнт</h3>
+                                <h3 className="text-[10px] uppercase tracking-widest font-bold text-bottle/70 ml-1">Клієнт</h3>
                                 <div className="bg-white p-4 border border-bottle/5 rounded-sm space-y-3">
                                   <div className="flex gap-3">
-                                    <User className="w-4 h-4 text-bottle/20 mt-0.5" />
+                                    <User className="w-4 h-4 text-bottle/50 mt-0.5" />
                                     <div>
                                       <p className="text-[10px] uppercase tracking-tighter text-bottle/40 font-bold">Контактна особа</p>
                                       <p className="text-xs text-bottle mt-1">{order.customer_name}</p>
                                     </div>
                                   </div>
                                   <div className="flex gap-3">
-                                    <Phone className="w-4 h-4 text-bottle/20 mt-0.5" />
+                                    <Phone className="w-4 h-4 text-bottle/50 mt-0.5" />
                                     <div>
                                       <p className="text-[10px] uppercase tracking-tighter text-bottle/40 font-bold">Телефон</p>
                                       <a href={`tel:${order.customer_phone}`} className="text-xs text-bottle hover:underline">{order.customer_phone}</a>
@@ -400,7 +403,7 @@ export default function OrdersPage() {
                                   </div>
                                   {order.customer_email && (
                                     <div className="flex gap-3">
-                                      <Mail className="w-4 h-4 text-bottle/20 mt-0.5" />
+                                      <Mail className="w-4 h-4 text-bottle/50 mt-0.5" />
                                       <div>
                                         <p className="text-[10px] uppercase tracking-tighter text-bottle/40 font-bold">Email</p>
                                         <a href={`mailto:${order.customer_email}`} className="text-xs text-bottle hover:underline">{order.customer_email}</a>
@@ -412,10 +415,10 @@ export default function OrdersPage() {
                             )}
 
                             <div className="space-y-4">
-                              <h3 className="text-[10px] uppercase tracking-widest font-bold text-bottle/40 ml-1">Доставка</h3>
+                              <h3 className="text-[10px] uppercase tracking-widest font-bold text-bottle/70 ml-1">Доставка</h3>
                               <div className="bg-white p-4 border border-bottle/5 rounded-sm space-y-3">
                                 <div className="flex gap-3">
-                                  <MapPin className="w-4 h-4 text-bottle/20 mt-0.5" />
+                                  <MapPin className="w-4 h-4 text-bottle/50 mt-0.5" />
                                   <div>
                                     <p className="text-[10px] uppercase tracking-tighter text-bottle/40 font-bold">Місто та адреса</p>
                                     <p className="text-xs text-bottle mt-1">
@@ -427,7 +430,7 @@ export default function OrdersPage() {
                                   </div>
                                 </div>
                                 <div className="flex gap-3">
-                                  <Truck className="w-4 h-4 text-bottle/20 mt-0.5" />
+                                  <Truck className="w-4 h-4 text-bottle/50 mt-0.5" />
                                   <div>
                                     <p className="text-[10px] uppercase tracking-tighter text-bottle/40 font-bold">Тип доставки</p>
                                     <p className="text-xs text-bottle">
@@ -439,10 +442,10 @@ export default function OrdersPage() {
                             </div>
 
                             <div className="space-y-4">
-                              <h3 className="text-[10px] uppercase tracking-widest font-bold text-bottle/40 ml-1">Оплата</h3>
+                              <h3 className="text-[10px] uppercase tracking-widest font-bold text-bottle/70 ml-1">Оплата</h3>
                               <div className="bg-white border border-bottle/5 rounded-sm overflow-hidden">
                                 <div className="p-4 flex gap-3">
-                                  <CreditCard className="w-4 h-4 text-bottle/20 mt-0.5" />
+                                  <CreditCard className="w-4 h-4 text-bottle/50 mt-0.5" />
                                   <div className="flex-grow">
                                     <p className="text-[10px] uppercase tracking-tighter text-bottle/40 font-bold">Метод та статус</p>
                                     <p className="text-xs text-bottle mt-1">
@@ -450,12 +453,31 @@ export default function OrdersPage() {
                                       {order.payment_method === 'details_full' && 'Реквізити (Повна)'}
                                       {order.payment_method === 'details_cod' && 'Реквізити (Наложений)'}
                                       <br />
-                                      <span className={`text-[10px] font-bold uppercase ${order.payment_status === 'paid' ? 'text-green-600' : 'text-yellow-600'}`}>
-                                        {order.payment_status === 'paid' ? 'Сплачено' : 'Очікує оплати'}
+                                      <span className={`text-[10px] font-bold uppercase ${
+                                        (order.payment_status === 'success' || (order.paid_amount ?? 0) > 0 || order.status === 'confirmed') 
+                                        ? 'text-green-600' 
+                                        : 'text-yellow-600'
+                                      }`}>
+                                        {(order.payment_status === 'success' || (order.paid_amount ?? 0) > 0 || order.status === 'confirmed') 
+                                        ? 'Сплачено' 
+                                        : 'Очікує оплати'}
                                       </span>
                                     </p>
                                   </div>
                                 </div>
+
+                                {/* Реквізити для оплати (тільки для клієнта і якщо очікує оплати) */}
+                                {!isAdmin && (order.status === 'awaiting_payment' || order.status === 'pending') && 
+                                 (order.payment_method === 'details_full' || order.payment_method === 'details_cod') && (
+                                  <div className="p-4 border-t border-bottle/5">
+                                    <PaymentDetails 
+                                      orderNumber={order.order_number} 
+                                      totalAmount={order.total} 
+                                      paymentMethod={order.payment_method}
+                                      className="shadow-none border border-milky/20"
+                                    />
+                                  </div>
+                                )}
 
                                 {/* Сплачено / Залишок / ТТН */}
                                 {( (order.paid_amount ?? 0) > 0 || order.ttn) && (

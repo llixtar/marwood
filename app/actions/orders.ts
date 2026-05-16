@@ -38,8 +38,13 @@ export type OrderFormData = {
 };
 
 export async function createOrderAction(data: OrderFormData) {
+  console.log('--- SERVER ACTION: createOrderAction started ---', {
+    orderNumber: 'generating...',
+    paymentMethod: data.paymentMethod
+  });
   try {
     const orderNumber = generateOrderNumber();
+    console.log('--- SERVER: generated order number:', orderNumber);
 
     // Підрахунок суми
     const subtotal = data.items.reduce((sum, item) => {
@@ -113,14 +118,20 @@ export async function createOrderAction(data: OrderFormData) {
 
     // Якщо оплата MonoPay — створюємо рахунок
     if (data.paymentMethod === 'monopay') {
-      const invoiceResult = await createMonoInvoice(order.id, order.order_number, total, data.items);
+      const invoiceResult = await createMonoInvoice(order.id, orderNumber, total, data.items);
       
       if (invoiceResult.success && invoiceResult.pageUrl) {
         // Оновлюємо замовлення з invoiceId
-        await supabaseAdmin
+        const { error: updateError } = await supabaseAdmin
           .from('orders')
           .update({ mono_invoice_id: invoiceResult.invoiceId })
           .eq('id', order.id);
+        
+        if (updateError) {
+          console.error('--- SERVER: Error updating mono_invoice_id:', updateError);
+        } else {
+          console.log('--- SERVER: mono_invoice_id updated successfully:', invoiceResult.invoiceId);
+        }
 
         return {
           success: true,
@@ -176,14 +187,22 @@ async function createMonoInvoice(
     total: Math.round((item.discount_price ?? item.price) * item.quantity * 100),
     unit: 'шт.',
     code: String(item.id),
+    icon: item.image, // Передаємо посилання на фото товару
   }));
+
+  console.log('=== MONOPAY REQUEST ===', {
+    url: 'https://api.monobank.ua/api/merchant/invoice/create',
+    orderNumber,
+    amount: Math.round(totalUAH * 100),
+    tokenPrefix: monoToken ? monoToken.substring(0, 4) : 'none'
+  });
 
   try {
     const response = await fetch('https://api.monobank.ua/api/merchant/invoice/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Token': monoToken,
+        'X-Token': monoToken.trim(),
       },
       body: JSON.stringify({
         amount: Math.round(totalUAH * 100), // в копійках
@@ -200,7 +219,14 @@ async function createMonoInvoice(
       }),
     });
 
-    const result = await response.json();
+    let result;
+    const text = await response.text();
+    try {
+      result = JSON.parse(text);
+    } catch (e) {
+      console.error('MonoPay JSON Parse Error. Raw body:', text);
+      return { success: false, error: 'Invalid response from MonoPay' };
+    }
 
     if (response.ok && result.pageUrl) {
       return {
@@ -210,11 +236,18 @@ async function createMonoInvoice(
       };
     }
 
+    console.error('=== MONOPAY API ERROR ===', {
+      status: response.status,
+      statusText: response.statusText,
+      body: result
+    });
+
     return {
       success: false,
-      error: result.errText || result.message || 'MonoPay API error',
+      error: `MonoPay Error (${response.status}): ${result.errText || result.message || 'Unknown error'}`,
     };
   } catch (error: any) {
+    console.error('=== MONOPAY NETWORK ERROR ===', error);
     return { success: false, error: error.message };
   }
 }
@@ -240,9 +273,18 @@ async function createMonoInvoice(
  ) {
    const updateData: any = { status };
    
+   // Якщо статус змінюється на "підтверджено" — вважаємо оплаченим (або передоплаченим)
+   if (status === 'confirmed') {
+     updateData.payment_status = 'success';
+   }
+
    if (adminData) {
      if (adminData.paidAmount !== undefined) {
        updateData.paid_amount = Math.round(adminData.paidAmount * 100);
+       // Якщо внесено будь-яку суму — теж маркуємо як успішну оплату (для логіки UI)
+       if (adminData.paidAmount > 0) {
+         updateData.payment_status = 'success';
+       }
      }
      if (adminData.ttn !== undefined) {
        updateData.ttn = adminData.ttn;

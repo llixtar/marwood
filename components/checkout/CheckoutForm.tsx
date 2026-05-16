@@ -121,7 +121,11 @@ export function CheckoutForm() {
   };
 
   const handleSubmit = async () => {
-    if (!validateStep2()) return;
+    console.log('--- CLIENT: handleSubmit CALLED ---');
+    if (!validateStep2()) {
+      console.log('--- CLIENT: validation failed ---');
+      return;
+    }
     if (orderItems.length === 0) {
       setError('Кошик порожній');
       return;
@@ -129,7 +133,7 @@ export function CheckoutForm() {
 
     setIsSubmitting(true);
     setError('');
-
+    console.log('--- CLIENT: handleSubmit called, invoking server action ---');
     try {
       const result = await createOrderAction({
         customerName: name,
@@ -159,7 +163,7 @@ export function CheckoutForm() {
           window.location.href = result.paymentUrl;
         } else {
           // COD → success page
-          router.push(`/checkout/success?order=${result.orderNumber}`);
+          router.push(`/checkout/success?order=${result.orderNumber}&method=${paymentMethod}&total=${total}`);
         }
       } else {
         setError(result.error || 'Сталася помилка при оформленні замовлення');
@@ -473,23 +477,6 @@ export function CheckoutForm() {
                       }`}>Наложений платіж (200 ₴)</span>
                     </button>
                   </div>
-
-                  {/* Реквізити Preview */}
-                  <div className="bg-bottle text-milky p-4 rounded-sm space-y-3 opacity-90">
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="space-y-1">
-                        <p className="text-[8px] uppercase tracking-tighter opacity-40">IBAN</p>
-                        <p className="text-[10px] font-mono font-bold break-all">UA000000000000000000000000000</p>
-                      </div>
-                      <div className="space-y-1 text-right">
-                        <p className="text-[8px] uppercase tracking-tighter opacity-40">ЄДРПОУ</p>
-                        <p className="text-[10px] font-mono font-bold">12345678</p>
-                      </div>
-                    </div>
-                    <p className="text-[9px] italic opacity-60 border-t border-milky/10 pt-2">
-                      * Реквізити та номер замовлення будуть доступні для копіювання після підтвердження.
-                    </p>
-                  </div>
                 </div>
               )}
             </div>
@@ -498,7 +485,7 @@ export function CheckoutForm() {
           {codPrepaymentRequired && (
             <div className="bg-amber-50 border border-amber-200 px-4 py-3 text-xs text-amber-700">
               <strong>Увага:</strong> Для наложеного платежу потрібна передоплата 200 ₴ на рахунок ФОП для підтвердження замовлення.
-              Реквізити будуть надані на наступному кроці.
+              Реквізити будуть надані після натискання кнопки нижче.
             </div>
           )}
 
@@ -558,7 +545,7 @@ export function CheckoutForm() {
               ) : (
                 <>
                   <ShieldCheck className="w-4 h-4" />
-                  {paymentMethod === 'monopay' ? 'Оплатити' : 'Оформити замовлення'}
+                  {paymentMethod === 'monopay' ? 'Оплатити' : 'Перейти до оплати'}
                 </>
               )}
             </button>
