@@ -29,12 +29,17 @@ export function UserMenu() {
 
   useEffect(() => {
     async function fetchStats() {
+      if (!user) return;
+
+      console.log('UserMenu: Fetching stats...', { isAdmin, userId: user.id });
+
       if (isAdmin) {
         const count = await getNewOrdersCount();
         setAdminCount(count);
-        setCustomerStats({ unpaid: 0, updated: 0 }); // Адмін не бачить своїх клієнтських статів
-      } else if (user) {
+        setCustomerStats({ unpaid: 0, updated: 0 });
+      } else {
         const stats = await getCustomerOrderStats(user.id);
+        console.log('UserMenu: Received customer stats:', stats);
         setCustomerStats(stats);
       }
     }

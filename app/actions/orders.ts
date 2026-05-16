@@ -373,12 +373,20 @@ export async function recreateMonoInvoiceAction(orderId: string) {
 }
 
 export async function getCustomerOrderStats(customerId: string) {
+  console.log('Fetching stats for customer:', customerId);
   const { data: orders, error } = await supabaseAdmin
     .from('orders')
     .select('status, payment_status, updated_at, created_at')
     .eq('customer_id', customerId);
 
-  if (error || !orders) return { unpaid: 0, updated: 0 };
+  if (error) {
+    console.error('Error fetching customer stats:', error);
+    return { unpaid: 0, updated: 0 };
+  }
+  
+  if (!orders) return { unpaid: 0, updated: 0 };
+
+  console.log(`Found ${orders.length} orders for customer`);
 
   const unpaid = orders.filter(o => 
     (o.status === 'pending' || o.status === 'awaiting_payment') && 
@@ -393,6 +401,8 @@ export async function getCustomerOrderStats(customerId: string) {
     o.status !== 'pending' && 
     o.status !== 'awaiting_payment'
   ).length;
+
+  console.log('Calculated stats:', { unpaid, updated });
 
   return { unpaid, updated };
 }
