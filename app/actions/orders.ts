@@ -328,3 +328,46 @@ async function createMonoInvoice(
    }
    return count || 0;
  }
+
+export async function recreateMonoInvoiceAction(orderId: string) {
+  try {
+    const { data: order, error: orderError } = await supabaseAdmin
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
+      .single();
+
+    if (orderError || !order) {
+      return { success: false, error: 'Замовлення не знайдено' };
+    }
+
+    // Підготовка товарів для кошика MonoPay
+    const items = order.items.map((item: any) => ({
+      title: item.title,
+      quantity: item.quantity,
+      price: item.price,
+      discount_price: item.discount_price,
+      image: item.image,
+      id: item.id
+    }));
+
+    const total = order.total / 100; // конвертуємо назад в гривні
+
+    const invoiceResult = await createMonoInvoice(order.id, order.order_number, total, items);
+
+    if (invoiceResult.success && invoiceResult.pageUrl) {
+      // Оновлюємо замовлення з новим invoiceId
+      await supabaseAdmin
+        .from('orders')
+        .update({ mono_invoice_id: invoiceResult.invoiceId })
+        .eq('id', order.id);
+
+      return { success: true, paymentUrl: invoiceResult.pageUrl };
+    }
+
+    return { success: false, error: invoiceResult.error };
+  } catch (error: any) {
+    console.error('recreateMonoInvoiceAction error:', error);
+    return { success: false, error: error.message };
+  }
+}

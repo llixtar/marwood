@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { getCustomerOrders } from '@/app/actions/customers';
-import { getAllOrdersAdmin, updateOrderStatus, deleteOrderAdmin } from '@/app/actions/orders';
+import { getAllOrdersAdmin, updateOrderStatus, deleteOrderAdmin, recreateMonoInvoiceAction } from '@/app/actions/orders';
 import { Package, Truck, Clock, CheckCircle2, ChevronRight, ShoppingBag, ExternalLink, Search, Mail, Phone, MapPin, CreditCard, User, XCircle, Info } from 'lucide-react';
 import { CopyButton } from '@/components/checkout/CopyButton';
 import { PaymentDetails } from '@/components/checkout/PaymentDetails';
@@ -38,8 +38,20 @@ export default function OrdersPage() {
   const [activeTab, setActiveTab] = useState<'new' | 'processing' | 'shipped' | 'all'>('all');
   const [adminPaidAmount, setAdminPaidAmount] = useState<string>('');
   const [adminTTN, setAdminTTN] = useState<string>('');
+  const [isPaying, setIsPaying] = useState<string | null>(null);
 
   const isAdmin = profile?.is_admin === true;
+
+  const handleRecreatePayment = async (orderId: string) => {
+    setIsPaying(orderId);
+    const res = await recreateMonoInvoiceAction(orderId);
+    if (res.success && res.paymentUrl) {
+      window.location.href = res.paymentUrl;
+    } else {
+      alert('Помилка: ' + res.error);
+      setIsPaying(null);
+    }
+  };
 
   useEffect(() => {
     async function fetchOrders() {
@@ -471,12 +483,36 @@ export default function OrdersPage() {
 
                                 {/* Реквізити для оплати (тільки для клієнта і якщо очікує оплати) */}
                                 {!isAdmin && (order.status === 'awaiting_payment' || order.status === 'pending') && 
-                                 (order.payment_method === 'details_full' || order.payment_method === 'details_cod') && (
-                                  <div className="p-4 border-t border-bottle/5">
+                                 (order.payment_status !== 'success' && (order.paid_amount ?? 0) < order.total) && (
+                                   <div className="p-4 border-t border-bottle/5 space-y-4">
+                                     {order.payment_method === 'monopay' && (
+                                       <button
+                                         onClick={() => handleRecreatePayment(order.id)}
+                                         disabled={isPaying === order.id}
+                                         className="w-full bg-bottle text-milky py-3 uppercase tracking-widest text-[10px] font-bold hover:bg-bottle/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 shadow-md"
+                                       >
+                                         {isPaying === order.id ? (
+                                           <>
+                                             <div className="w-3 h-3 border-2 border-milky/30 border-t-milky rounded-full animate-spin" />
+                                             Генеруємо рахунок...
+                                           </>
+                                         ) : (
+                                           <>
+                                             <CreditCard className="w-4 h-4" />
+                                             Оплатити через MonoPay
+                                           </>
+                                         )}
+                                       </button>
+                                     )}
+
+                                     <div className="relative py-2">
+                                       <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-bottle/5"></div></div>
+                                       <div className="relative flex justify-center text-[8px] uppercase tracking-tighter"><span className="bg-[#fafaf5] px-2 text-bottle/30">Або за реквізитами</span></div>
+                                     </div>
                                     <PaymentDetails 
                                       orderNumber={order.order_number} 
                                       totalAmount={order.total} 
-                                      paymentMethod={order.payment_method}
+                                      paymentMethod={order.payment_method === 'monopay' ? 'details_full' : order.payment_method}
                                       className="shadow-none border border-milky/20"
                                     />
                                   </div>
