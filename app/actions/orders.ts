@@ -371,3 +371,28 @@ export async function recreateMonoInvoiceAction(orderId: string) {
     return { success: false, error: error.message };
   }
 }
+
+export async function getCustomerOrderStats(customerId: string) {
+  const { data: orders, error } = await supabaseAdmin
+    .from('orders')
+    .select('status, payment_status, updated_at, created_at')
+    .eq('customer_id', customerId);
+
+  if (error || !orders) return { unpaid: 0, updated: 0 };
+
+  const unpaid = orders.filter(o => 
+    (o.status === 'pending' || o.status === 'awaiting_payment') && 
+    o.payment_status !== 'success'
+  ).length;
+
+  // Оновленими вважаємо ті, що змінили статус за останні 24 години і не є новими
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const updated = orders.filter(o => 
+    o.updated_at > oneDayAgo && 
+    o.updated_at !== o.created_at &&
+    o.status !== 'pending' && 
+    o.status !== 'awaiting_payment'
+  ).length;
+
+  return { unpaid, updated };
+}

@@ -6,12 +6,13 @@ import { useAuthStore } from '@/lib/store/authStore';
 import { useCartStore } from '@/lib/store/cartStore';
 import { useWishlistStore } from '@/lib/store/wishlistStore';
 import { User, Package, Settings, LogOut, ChevronDown, Bell } from 'lucide-react';
-import { getNewOrdersCount } from '@/app/actions/orders';
+import { getNewOrdersCount, getCustomerOrderStats } from '@/app/actions/orders';
 
 export function UserMenu() {
   const { user, profile, signOut } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
-  const [newOrdersCount, setNewOrdersCount] = useState(0);
+  const [adminCount, setAdminCount] = useState(0);
+  const [customerStats, setCustomerStats] = useState({ unpaid: 0, updated: 0 });
   const menuRef = useRef<HTMLDivElement>(null);
 
   const isAdmin = profile?.is_admin === true;
@@ -27,29 +28,30 @@ export function UserMenu() {
   }, []);
 
   useEffect(() => {
-    async function fetchCount() {
+    async function fetchStats() {
       if (isAdmin) {
         const count = await getNewOrdersCount();
-        setNewOrdersCount(count);
-      } else {
-        setNewOrdersCount(0);
+        setAdminCount(count);
+      } else if (user) {
+        const stats = await getCustomerOrderStats(user.id);
+        setCustomerStats(stats);
       }
     }
 
-    fetchCount();
+    fetchStats();
 
     // Слухаємо подію оновлення
-    const handleRefresh = () => fetchCount();
+    const handleRefresh = () => fetchStats();
     window.addEventListener('refresh-orders-count', handleRefresh);
 
     // Періодичне оновлення (раз на 2 хвилини)
-    const interval = setInterval(fetchCount, 120000);
+    const interval = setInterval(fetchStats, 120000);
 
     return () => {
       window.removeEventListener('refresh-orders-count', handleRefresh);
       clearInterval(interval);
     };
-  }, [isAdmin]);
+  }, [isAdmin, user]);
 
   if (!user) return null;
 
@@ -75,8 +77,14 @@ export function UserMenu() {
       >
         <div className="w-7 h-7 rounded-full bg-bottle text-milky flex items-center justify-center text-[10px] font-bold relative">
           {initials}
-          {isAdmin && newOrdersCount > 0 && (
+          {isAdmin && adminCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 border border-white rounded-full animate-pulse" />
+          )}
+          {!isAdmin && customerStats.unpaid > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 border border-white rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+          )}
+          {!isAdmin && customerStats.updated > 0 && customerStats.unpaid === 0 && (
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border border-white rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
           )}
         </div>
         <span className="text-[10px] font-bold uppercase tracking-wider hidden lg:inline max-w-[100px] truncate">
@@ -115,10 +123,23 @@ export function UserMenu() {
             >
               <Package className="w-4 h-4 text-bottle/40" />
               <div className="flex items-center justify-between flex-1">
-                <span>{isAdmin ? 'Замовлення' : 'Мої замовлення'}</span>
-                {isAdmin && newOrdersCount > 0 && (
+                <span className="flex items-center gap-2">
+                  {isAdmin ? 'Замовлення' : 'Мої замовлення'}
+                  {!isAdmin && customerStats.unpaid > 0 && (
+                    <span className="animate-pulse text-red-500 font-bold">!</span>
+                  )}
+                  {!isAdmin && customerStats.updated > 0 && (
+                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_5px_rgba(34,197,94,0.5)]" />
+                  )}
+                </span>
+                {isAdmin && adminCount > 0 && (
                   <span className="bg-red-500 text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold">
-                    {newOrdersCount}
+                    {adminCount}
+                  </span>
+                )}
+                {!isAdmin && (customerStats.unpaid > 0 || customerStats.updated > 0) && (
+                  <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-bold text-white ${customerStats.unpaid > 0 ? 'bg-red-500' : 'bg-green-500'}`}>
+                    {customerStats.unpaid > 0 ? customerStats.unpaid : customerStats.updated}
                   </span>
                 )}
               </div>

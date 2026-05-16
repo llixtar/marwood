@@ -85,6 +85,32 @@ export default function OrdersPage() {
     }
   }, [user, isInitialized, isAdmin]);
 
+  // Автопідстановка даних при виборі замовлення адміном
+  useEffect(() => {
+    if (selectedOrder && isAdmin) {
+      setAdminTTN(selectedOrder.ttn || '');
+      
+      // Якщо це нове замовлення, підставляємо суму для підтвердження
+      if (selectedOrder.status === 'pending' || selectedOrder.status === 'awaiting_payment') {
+        if (selectedOrder.paid_amount && selectedOrder.paid_amount > 0) {
+          // Якщо вже є оплата (наприклад від MonoPay)
+          setAdminPaidAmount((selectedOrder.paid_amount / 100).toString());
+        } else if (selectedOrder.payment_method === 'details_cod') {
+          // Для наложки за замовчуванням 200
+          setAdminPaidAmount('200');
+        } else {
+          // Для повної оплати — вся сума
+          setAdminPaidAmount((selectedOrder.total / 100).toString());
+        }
+      } else {
+        setAdminPaidAmount(selectedOrder.paid_amount ? (selectedOrder.paid_amount / 100).toString() : '');
+      }
+    } else if (!selectedOrder) {
+      setAdminPaidAmount('');
+      setAdminTTN('');
+    }
+  }, [selectedOrder, isAdmin]);
+
   const handleUpdateOrder = async (orderId: string, status: string, adminData?: { paidAmount?: number; ttn?: string }) => {
     const res = await updateOrderStatus(orderId, status, adminData);
     if (res.success) {
@@ -484,38 +510,48 @@ export default function OrdersPage() {
                                 {/* Реквізити для оплати (тільки для клієнта і якщо очікує оплати) */}
                                 {!isAdmin && (order.status === 'awaiting_payment' || order.status === 'pending') && 
                                  (order.payment_status !== 'success' && (order.paid_amount ?? 0) < order.total) && (
-                                   <div className="p-4 border-t border-bottle/5 space-y-4">
+                                   <div className="p-6 border-t border-bottle/5 space-y-8 bg-milky/10">
                                      {order.payment_method === 'monopay' && (
-                                       <button
-                                         onClick={() => handleRecreatePayment(order.id)}
-                                         disabled={isPaying === order.id}
-                                         className="w-full bg-bottle text-milky py-3 uppercase tracking-widest text-[10px] font-bold hover:bg-bottle/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 shadow-md"
-                                       >
-                                         {isPaying === order.id ? (
-                                           <>
-                                             <div className="w-3 h-3 border-2 border-milky/30 border-t-milky rounded-full animate-spin" />
-                                             Генеруємо рахунок...
-                                           </>
-                                         ) : (
-                                           <>
-                                             <CreditCard className="w-4 h-4" />
-                                             Оплатити через MonoPay
-                                           </>
-                                         )}
-                                       </button>
+                                       <div className="space-y-4">
+                                         <div className="flex items-center gap-2">
+                                           <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_5px_rgba(239,68,68,0.5)]" />
+                                           <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-bottle">Швидка оплата онлайн</h4>
+                                         </div>
+                                         <button
+                                           onClick={() => handleRecreatePayment(order.id)}
+                                           disabled={isPaying === order.id}
+                                           className="w-full bg-bottle text-milky py-4 uppercase tracking-[0.3em] text-[10px] font-bold hover:bg-[#0a0a0a] transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-lg active:scale-[0.98] rounded-sm"
+                                         >
+                                           {isPaying === order.id ? (
+                                             <>
+                                               <div className="w-3 h-3 border-2 border-milky/30 border-t-milky rounded-full animate-spin" />
+                                               Зачекайте...
+                                             </>
+                                           ) : (
+                                             <>
+                                               <div className="bg-white text-bottle rounded-full p-1"><CreditCard className="w-3 h-3" /></div>
+                                               Оплатити через MonoPay
+                                             </>
+                                           )}
+                                         </button>
+                                         <p className="text-[9px] text-center text-bottle/40 italic font-medium">Безпечна оплата через Monobank</p>
+                                       </div>
                                      )}
 
-                                     <div className="relative py-2">
-                                       <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-bottle/5"></div></div>
-                                       <div className="relative flex justify-center text-[8px] uppercase tracking-tighter"><span className="bg-[#fafaf5] px-2 text-bottle/30">Або за реквізитами</span></div>
+                                     <div className="space-y-4">
+                                       <div className="relative py-2">
+                                         <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-bottle/10"></div></div>
+                                         <div className="relative flex justify-center text-[9px] uppercase tracking-widest font-bold"><span className="bg-[#fafaf5] px-4 text-bottle/30">Реквізити для переказу</span></div>
+                                       </div>
+
+                                       <PaymentDetails 
+                                         orderNumber={order.order_number} 
+                                         totalAmount={order.total} 
+                                         paymentMethod={order.payment_method === 'monopay' ? 'details_full' : order.payment_method}
+                                         className="rounded-none border-none shadow-none !p-0"
+                                       />
                                      </div>
-                                    <PaymentDetails 
-                                      orderNumber={order.order_number} 
-                                      totalAmount={order.total} 
-                                      paymentMethod={order.payment_method === 'monopay' ? 'details_full' : order.payment_method}
-                                      className="shadow-none border border-milky/20"
-                                    />
-                                  </div>
+                                   </div>
                                 )}
 
                                 {/* Сплачено / Залишок / ТТН */}
