@@ -376,7 +376,7 @@ export async function getCustomerOrderStats(customerId: string) {
   console.log('Fetching stats for customer:', customerId);
   const { data: orders, error } = await supabaseAdmin
     .from('orders')
-    .select('status, payment_status, updated_at, created_at')
+    .select('*')
     .eq('customer_id', customerId);
 
   if (error) {

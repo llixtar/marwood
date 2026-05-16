@@ -38,8 +38,9 @@ export function UserMenu() {
         setAdminCount(count);
         setCustomerStats({ unpaid: 0, updated: 0 });
       } else {
+        console.log('UserMenu: Calling getCustomerOrderStats for:', user.id);
         const stats = await getCustomerOrderStats(user.id);
-        console.log('UserMenu: Received customer stats:', stats);
+        console.log('UserMenu: Full stats object:', stats);
         setCustomerStats(stats);
       }
     }
