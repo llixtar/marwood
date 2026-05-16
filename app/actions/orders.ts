@@ -384,7 +384,7 @@ export async function getCustomerOrderStats(authUserId: string) {
 
   if (!profile) {
     console.log('No customer profile found for this auth user');
-    return { unpaid: 0, updated: 0 };
+    return { unpaid: 0, updatedOrders: [] };
   }
 
   const { data: orders, error } = await supabaseAdmin
@@ -394,10 +394,10 @@ export async function getCustomerOrderStats(authUserId: string) {
 
   if (error) {
     console.error('Error fetching customer stats:', error);
-    return { unpaid: 0, updated: 0 };
+    return { unpaid: 0, updatedOrders: [] };
   }
   
-  if (!orders) return { unpaid: 0, updated: 0 };
+  if (!orders) return { unpaid: 0, updatedOrders: [] };
 
   console.log(`Found ${orders.length} orders for customer`);
 
