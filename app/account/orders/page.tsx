@@ -344,7 +344,22 @@ export default function OrdersPage() {
                     >
                       {/* Order Header (Clickable) */}
                       <button 
-                        onClick={() => setSelectedOrder(selectedOrder?.id === order.id ? null : order)}
+                        onClick={() => {
+                          setSelectedOrder(selectedOrder?.id === order.id ? null : order);
+                          
+                          // Відмічаємо замовлення як "переглянуте"
+                          if (!isAdmin) {
+                            try {
+                              const viewedStr = localStorage.getItem('viewed_order_updates');
+                              const viewed = viewedStr ? JSON.parse(viewedStr) : {};
+                              viewed[order.id] = order.updated_at;
+                              localStorage.setItem('viewed_order_updates', JSON.stringify(viewed));
+                              window.dispatchEvent(new Event('refresh-orders-count'));
+                            } catch (e) {
+                              console.error('Failed to update viewed status', e);
+                            }
+                          }
+                        }}
                         className="w-full text-left p-5 flex flex-wrap items-center justify-between gap-4 relative"
                       >
                         {isAdmin && (order.status === 'pending' || order.status === 'awaiting_payment') && (

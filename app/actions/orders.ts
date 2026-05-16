@@ -408,14 +408,16 @@ export async function getCustomerOrderStats(authUserId: string) {
 
   // Оновленими вважаємо ті, що змінили статус за останні 24 години і не є новими
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const updated = orders.filter(o => 
-    o.updated_at > oneDayAgo && 
-    o.updated_at !== o.created_at &&
-    o.status !== 'pending' && 
-    o.status !== 'awaiting_payment'
-  ).length;
+  const updatedOrders = orders
+    .filter(o => 
+      o.updated_at > oneDayAgo && 
+      o.updated_at !== o.created_at &&
+      o.status !== 'pending' && 
+      o.status !== 'awaiting_payment'
+    )
+    .map(o => ({ id: o.id, updated_at: o.updated_at }));
 
-  console.log('Calculated stats:', { unpaid, updated });
+  console.log('Calculated stats:', { unpaid, updated: updatedOrders.length });
 
-  return { unpaid, updated };
+  return { unpaid, updatedOrders };
 }

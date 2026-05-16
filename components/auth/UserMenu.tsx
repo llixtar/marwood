@@ -31,17 +31,28 @@ export function UserMenu() {
     async function fetchStats() {
       if (!user) return;
 
-      console.log('UserMenu: Fetching stats...', { isAdmin, userId: user.id });
-
       if (isAdmin) {
         const count = await getNewOrdersCount();
         setAdminCount(count);
         setCustomerStats({ unpaid: 0, updated: 0 });
       } else {
-        console.log('UserMenu: Calling getCustomerOrderStats for:', user.id);
         const stats = await getCustomerOrderStats(user.id);
-        console.log('UserMenu: Full stats object:', stats);
-        setCustomerStats(stats);
+        
+        // Звіряємо з localStorage (які оновлення вже бачили)
+        let unreadUpdates = 0;
+        try {
+          const viewedStr = localStorage.getItem('viewed_order_updates');
+          const viewed = viewedStr ? JSON.parse(viewedStr) : {};
+          
+          unreadUpdates = stats.updatedOrders.filter((o: any) => {
+            // Якщо ще не бачили, або статус/час оновився після того, як бачили
+            return !viewed[o.id] || viewed[o.id] < o.updated_at;
+          }).length;
+        } catch (e) {
+          unreadUpdates = stats.updatedOrders.length;
+        }
+
+        setCustomerStats({ unpaid: stats.unpaid, updated: unreadUpdates });
       }
     }
 
