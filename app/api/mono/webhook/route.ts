@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const { invoiceId, status, modifiedDate, reference } = body;
+    const { invoiceId, status, amount, modifiedDate, reference } = body;
 
     if (!invoiceId || !status) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
