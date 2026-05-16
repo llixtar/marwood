@@ -372,12 +372,25 @@ export async function recreateMonoInvoiceAction(orderId: string) {
   }
 }
 
-export async function getCustomerOrderStats(customerId: string) {
-  console.log('Fetching stats for customer:', customerId);
+export async function getCustomerOrderStats(authUserId: string) {
+  console.log('Fetching stats for auth_user:', authUserId);
+
+  // Спочатку знаходимо справжній customer_id через профіль
+  const { data: profile } = await supabaseAdmin
+    .from('customer_profiles')
+    .select('id')
+    .eq('auth_user_id', authUserId)
+    .single();
+
+  if (!profile) {
+    console.log('No customer profile found for this auth user');
+    return { unpaid: 0, updated: 0 };
+  }
+
   const { data: orders, error } = await supabaseAdmin
     .from('orders')
     .select('*')
-    .eq('customer_id', customerId);
+    .eq('customer_id', profile.id);
 
   if (error) {
     console.error('Error fetching customer stats:', error);
