@@ -413,7 +413,7 @@ export function ProductQuickView({ product: initialProduct, isOpen, onClose }: P
             <div className="mt-4 flex flex-col gap-3 p-4 bg-[#F9F9F9] border border-black/5 text-xs text-bottle/70">
               <div className="flex items-center gap-3">
                 <Truck className="w-4 h-4 text-bottle opacity-60" />
-                <p><strong>Безкоштовна доставка</strong> Новою Поштою від 2000 ₴</p>
+                <p><strong>Безкоштовна доставка</strong> Новою Поштою від 2500 ₴</p>
               </div>
               <div className="flex items-center gap-3">
                 <ShieldCheck className="w-4 h-4 text-bottle opacity-60" />

@@ -10,21 +10,23 @@ import {
   CarouselItem,
 } from '@/components/ui/carousel';
 
-// Дані для верхнього ряду (3 картинки)
+// Дані для верхнього ряду (4 картинки)
 const topCategories = [
+  { id: 4, title: 'Базова білизна', link: '/category/basic', image: '/categories/basic.jpg' },
   { id: 1, title: 'Еротична білизна', link: '/category/erotic', image: '/categories/erotic.jpg' },
   { id: 2, title: 'Костюми еротичні', link: '/category/costumes', image: '/categories/costumes.jpg' },
   { id: 3, title: 'Купальники', link: '/category/swimwear', image: '/categories/swimwear.jpg' },
 ];
 
-// Дані для нижнього ряду (6 картинок)
+// Дані для нижнього ряду (7 картинок)
 const bottomCategories = [
-  { id: 4, title: 'Базова білизна', link: '/category/basic', image: '/categories/basic.jpg' },
   { id: 5, title: 'Труси', link: '/category/panties', image: '/categories/panties2.jpg' },
   { id: 6, title: 'Боді', link: '/category/body', image: '/categories/body.jpg' },
+  { id: 10, title: 'Корсети', link: '/category/corsets', image: '/categories/corsets.jpg' },
   { id: 7, title: 'Халати', link: '/category/robes', image: '/categories/robes.jpg' },
   { id: 8, title: 'Піжами', link: '/category/pajamas', image: '/categories/pajamas.jpg' },
   { id: 9, title: 'Плюс сайз', link: '/category/plus-size', image: '/categories/plus-size.jpg' },
+  { id: 11, title: 'Інше', link: '/category/other', image: '/categories/other.jpg' },
 ];
 
 export function CatalogGallery() {
@@ -41,14 +43,14 @@ export function CatalogGallery() {
 
         {/* --- ДЕСКТОПНА ВЕРСІЯ (Сітка) --- */}
         <div className="hidden md:flex flex-col gap-4">
-          {/* Верхній ряд: 3 колонки */}
-          <div className="grid grid-cols-3 gap-4 h-[450px]">
+          {/* Верхній ряд: 4 колонки */}
+          <div className="grid grid-cols-4 gap-4 h-[450px]">
             {topCategories.map((cat) => (
               <CategoryCard key={cat.id} category={cat} />
             ))}
           </div>
-          {/* Нижній ряд: 6 колонок (для балансу) */}
-          <div className="grid grid-cols-6 gap-4 h-[350px]">
+          {/* Нижній ряд: 7 колонок (для балансу) */}
+          <div className="grid grid-cols-7 gap-4 h-[350px]">
             {bottomCategories.map((cat) => (
               <CategoryCard key={cat.id} category={cat} />
             ))}

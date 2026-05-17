@@ -397,9 +397,16 @@ export function ProductForm({ initialData, returnParams }: ProductFormProps) {
               <option value="robes">Халати</option>
               <option value="pajamas">Піжами</option>
               <option value="body">Боді</option>
+              <option value="corsets">Корсети</option>
               <option value="plus-size">Плюс сайз (інше)</option>
               <option value="plus-size-swimwear">Купальники (Plus Size)</option>
               <option value="swimwear">Купальники</option>
+              <option value="other">Інше (все)</option>
+              <option value="sportswear">Спортивний одяг (Інше)</option>
+              <option value="socks">Шкарпетки (Інше)</option>
+              <option value="stockings">Панчохи (Інше)</option>
+              <option value="gloves">Рукавички (Інше)</option>
+              <option value="wigs">Перуки (Інше)</option>
             </select>
           </div>
 

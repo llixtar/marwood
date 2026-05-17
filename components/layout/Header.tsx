@@ -29,11 +29,13 @@ import { useState } from 'react';
 
 export function Header() {
   const [isPlusSizeOpen, setIsPlusSizeOpen] = useState(false);
+  const [isOtherOpen, setIsOtherOpen] = useState(false);
   const [menuValue, setMenuValue] = useState("");
 
   const handleLinkClick = () => {
     setMenuValue("");
     setIsPlusSizeOpen(false);
+    setIsOtherOpen(false);
   };
 
   return (
@@ -73,19 +75,36 @@ export function Header() {
                       <SheetClose asChild><Link href="/category/robes" className="text-base text-bottle/80 hover:text-bottle">Халати</Link></SheetClose>
                       <SheetClose asChild><Link href="/category/pajamas" className="text-base text-bottle/80 hover:text-bottle">Піжами</Link></SheetClose>
                       <SheetClose asChild><Link href="/category/body" className="text-base text-bottle/80 hover:text-bottle">Боді</Link></SheetClose>
+                      <SheetClose asChild><Link href="/category/corsets" className="text-base text-bottle/80 hover:text-bottle">Корсети</Link></SheetClose>
 
                       <SheetClose asChild><Link href="/category/swimwear" className="text-base text-bottle/80 hover:text-bottle">Купальники</Link></SheetClose>
 
                       {/* Плюс сайз з підкатегоріями */}
                       <details className="group/sub">
-                        <summary className="flex cursor-pointer list-none items-center gap-2 text-base text-bottle/80 hover:text-bottle [&::-webkit-details-marker]:hidden">
-                          Плюс сайз
-                          <ChevronDown className="h-4 w-4 transition-transform group-open/sub:rotate-180" />
-                        </summary>
-                        <div className="mt-3 flex flex-col gap-4 pl-4 border-l border-bottle/10">
-                          <SheetClose asChild><Link href="/category/plus-size" className="text-sm text-bottle/60 hover:text-bottle italic">Дивитись все</Link></SheetClose>
-                          <SheetClose asChild><Link href="/category/plus-size-swimwear" className="text-sm text-bottle/60 hover:text-bottle">Купальники</Link></SheetClose>
-                        </div>
+                         <summary className="flex cursor-pointer list-none items-center gap-2 text-base text-bottle/80 hover:text-bottle [&::-webkit-details-marker]:hidden">
+                           Плюс сайз
+                           <ChevronDown className="h-4 w-4 transition-transform group-open/sub:rotate-180" />
+                         </summary>
+                         <div className="mt-3 flex flex-col gap-4 pl-4 border-l border-bottle/10">
+                           <SheetClose asChild><Link href="/category/plus-size" className="text-sm text-bottle/60 hover:text-bottle italic">Дивитись все</Link></SheetClose>
+                           <SheetClose asChild><Link href="/category/plus-size-swimwear" className="text-sm text-bottle/60 hover:text-bottle">Купальники</Link></SheetClose>
+                         </div>
+                      </details>
+
+                      {/* Інше з підкатегоріями */}
+                      <details className="group/sub">
+                         <summary className="flex cursor-pointer list-none items-center gap-2 text-base text-bottle/80 hover:text-bottle [&::-webkit-details-marker]:hidden">
+                           Інше
+                           <ChevronDown className="h-4 w-4 transition-transform group-open/sub:rotate-180" />
+                         </summary>
+                         <div className="mt-3 flex flex-col gap-4 pl-4 border-l border-bottle/10">
+                           <SheetClose asChild><Link href="/category/other" className="text-sm text-bottle/60 hover:text-bottle italic">Дивитись все</Link></SheetClose>
+                           <SheetClose asChild><Link href="/category/sportswear" className="text-sm text-bottle/60 hover:text-bottle">Спортивний одяг</Link></SheetClose>
+                           <SheetClose asChild><Link href="/category/socks" className="text-sm text-bottle/60 hover:text-bottle">Шкарпетки</Link></SheetClose>
+                           <SheetClose asChild><Link href="/category/stockings" className="text-sm text-bottle/60 hover:text-bottle">Панчохи</Link></SheetClose>
+                           <SheetClose asChild><Link href="/category/gloves" className="text-sm text-bottle/60 hover:text-bottle">Рукавички</Link></SheetClose>
+                           <SheetClose asChild><Link href="/category/wigs" className="text-sm text-bottle/60 hover:text-bottle">Перуки</Link></SheetClose>
+                         </div>
                       </details>
                     </div>
                   </details>
@@ -154,6 +173,7 @@ export function Header() {
                       <li><NavigationMenuLink asChild><Link href="/category/robes" onClick={handleLinkClick} className="block px-4 py-2 hover:bg-bottle hover:text-white text-bottle rounded-xl transition-all text-sm font-medium">Халати</Link></NavigationMenuLink></li>
                       <li><NavigationMenuLink asChild><Link href="/category/pajamas" onClick={handleLinkClick} className="block px-4 py-2 hover:bg-bottle hover:text-white text-bottle rounded-xl transition-all text-sm font-medium">Піжами</Link></NavigationMenuLink></li>
                       <li><NavigationMenuLink asChild><Link href="/category/body" onClick={handleLinkClick} className="block px-4 py-2 hover:bg-bottle hover:text-white text-bottle rounded-xl transition-all text-sm font-medium">Боді</Link></NavigationMenuLink></li>
+                      <li><NavigationMenuLink asChild><Link href="/category/corsets" onClick={handleLinkClick} className="block px-4 py-2 hover:bg-bottle hover:text-white text-bottle rounded-xl transition-all text-sm font-medium">Корсети</Link></NavigationMenuLink></li>
 
                       <li><NavigationMenuLink asChild><Link href="/category/swimwear" onClick={handleLinkClick} className="block px-4 py-2 hover:bg-bottle hover:text-white text-bottle rounded-xl transition-all text-sm font-medium">Купальники</Link></NavigationMenuLink></li>
 
@@ -188,6 +208,88 @@ export function Header() {
                                   className="block px-4 py-1.5 hover:text-bottle text-bottle/60 transition-all text-[13px] font-medium border-l border-bottle/10"
                                 >
                                   Купальники
+                                </Link>
+                              </NavigationMenuLink>
+                            </li>
+                          </ul>
+                        )}
+                      </li>
+
+                      {/* Інше з підкатегоріями */}
+                      <li className="flex flex-col">
+                        <button
+                          onClick={() => setIsOtherOpen(!isOtherOpen)}
+                          className="flex items-center justify-between w-full px-4 py-2 hover:bg-bottle hover:text-white text-bottle rounded-xl transition-all text-sm font-medium group/btn"
+                        >
+                          <span>Інше</span>
+                          <ChevronDown className={`w-4 h-4 transition-transform ${isOtherOpen ? 'rotate-180' : ''}`} />
+                        </button>
+
+                        {isOtherOpen && (
+                          <ul className="pl-6 mt-1 mb-2 flex flex-col gap-1 transition-all">
+                            <li>
+                              <NavigationMenuLink asChild>
+                                <Link
+                                  href="/category/other"
+                                  onClick={handleLinkClick}
+                                  className="block px-4 py-1.5 hover:text-bottle text-bottle/60 transition-all text-[13px] font-medium border-l border-bottle/10 italic"
+                                >
+                                  Дивитись все
+                                </Link>
+                              </NavigationMenuLink>
+                            </li>
+                            <li>
+                              <NavigationMenuLink asChild>
+                                <Link
+                                  href="/category/sportswear"
+                                  onClick={handleLinkClick}
+                                  className="block px-4 py-1.5 hover:text-bottle text-bottle/60 transition-all text-[13px] font-medium border-l border-bottle/10"
+                                >
+                                  Спортивний одяг
+                                </Link>
+                              </NavigationMenuLink>
+                            </li>
+                            <li>
+                              <NavigationMenuLink asChild>
+                                <Link
+                                  href="/category/socks"
+                                  onClick={handleLinkClick}
+                                  className="block px-4 py-1.5 hover:text-bottle text-bottle/60 transition-all text-[13px] font-medium border-l border-bottle/10"
+                                >
+                                  Шкарпетки
+                                </Link>
+                              </NavigationMenuLink>
+                            </li>
+                            <li>
+                              <NavigationMenuLink asChild>
+                                <Link
+                                  href="/category/stockings"
+                                  onClick={handleLinkClick}
+                                  className="block px-4 py-1.5 hover:text-bottle text-bottle/60 transition-all text-[13px] font-medium border-l border-bottle/10"
+                                >
+                                  Панчохи
+                                </Link>
+                              </NavigationMenuLink>
+                            </li>
+                            <li>
+                              <NavigationMenuLink asChild>
+                                <Link
+                                  href="/category/gloves"
+                                  onClick={handleLinkClick}
+                                  className="block px-4 py-1.5 hover:text-bottle text-bottle/60 transition-all text-[13px] font-medium border-l border-bottle/10"
+                                >
+                                  Рукавички
+                                </Link>
+                              </NavigationMenuLink>
+                            </li>
+                            <li>
+                              <NavigationMenuLink asChild>
+                                <Link
+                                  href="/category/wigs"
+                                  onClick={handleLinkClick}
+                                  className="block px-4 py-1.5 hover:text-bottle text-bottle/60 transition-all text-[13px] font-medium border-l border-bottle/10"
+                                >
+                                  Перуки
                                 </Link>
                               </NavigationMenuLink>
                             </li>

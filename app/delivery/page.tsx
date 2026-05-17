@@ -48,7 +48,7 @@ export default function DeliveryPage() {
                   <span className="font-bold text-bottle uppercase text-xs tracking-widest">Безкоштовна доставка</span>
                   <span className="px-2 py-0.5 bg-bottle text-milky text-[8px] font-bold uppercase tracking-tighter rounded-full">Акція</span>
                 </div>
-                <p className="text-sm">При замовленні на суму від <strong>2000 ₴</strong> доставка до будь-якого відділення Нової Пошти — <strong>безкоштовна</strong>.</p>
+                <p className="text-sm">При замовленні на суму від <strong>2500 ₴</strong> доставка до будь-якого відділення Нової Пошти — <strong>безкоштовна</strong>.</p>
               </div>
 
               <p className="text-sm italic pt-4">Відправки здійснюються зі складів у с. Шаровечка (Хмельницька обл.) або м. Луцьк щодня, окрім неділі. Самовивозу немає.</p>

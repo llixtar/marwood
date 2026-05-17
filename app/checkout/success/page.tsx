@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { CopyButton } from '@/components/checkout/CopyButton';
 import { PaymentDetails } from '@/components/checkout/PaymentDetails';
+import { ClearCart } from '@/components/checkout/ClearCart';
 
 export const metadata: Metadata = {
   title: 'Замовлення прийнято — Marwood',
@@ -40,6 +41,11 @@ export default async function CheckoutSuccessPage({
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 py-8">
+      {orderData ? (
+        <ClearCart purchasedItems={orderData.items} />
+      ) : (
+        <ClearCart />
+      )}
       <div className="max-w-md w-full text-center space-y-6">
 
         {/* Іконка та заголовок */}

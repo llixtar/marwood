@@ -46,7 +46,7 @@ export function OrderSummary() {
 
   const total = displayedItems.reduce((sum, i) => sum + (i.discount_price ?? i.price) * i.quantity, 0);
   const count = displayedItems.reduce((sum, i) => sum + i.quantity, 0);
-  const freeShippingThreshold = 2000;
+  const freeShippingThreshold = 2500;
   const finalTotal = total;
 
   return (

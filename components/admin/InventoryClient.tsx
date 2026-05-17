@@ -13,9 +13,16 @@ const CATEGORIES = [
   { slug: 'robes', name: 'Халати' },
   { slug: 'pajamas', name: 'Піжами' },
   { slug: 'body', name: 'Боді' },
+  { slug: 'corsets', name: 'Корсети' },
   { slug: 'plus-size', name: 'Плюс сайз (всі)' },
   { slug: 'plus-size-swimwear', name: 'Купальники (Plus Size)' },
-  { slug: 'swimwear', name: 'Купальники' }
+  { slug: 'swimwear', name: 'Купальники' },
+  { slug: 'other', name: 'Інше (все)' },
+  { slug: 'sportswear', name: 'Спортивний одяг' },
+  { slug: 'socks', name: 'Шкарпетки' },
+  { slug: 'stockings', name: 'Панчохи' },
+  { slug: 'gloves', name: 'Рукавички' },
+  { slug: 'wigs', name: 'Перуки' }
 ];
 
 export function InventoryClient({ initialProducts }: { initialProducts: any[] }) {

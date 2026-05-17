@@ -2,6 +2,7 @@ import { Hero } from "@/components/sections/Hero";
 import { Features } from "@/components/sections/Features";
 import { CatalogGallery } from "@/components/sections/CatalogGallery";
 import { ProductShowcase } from "@/components/sections/ProductShowcase";
+import { ReviewsSection } from "@/components/sections/ReviewsSection";
 import { supabaseAdmin } from "@/lib/supabase/server";
 
 // Додаємо ревалідацію щоб бачити зміни
@@ -43,6 +44,7 @@ export default async function Home() {
         newProducts={newProds || []} 
         saleProducts={saleProds || []} 
       />
+      <ReviewsSection />
     </main>
   );
 }
