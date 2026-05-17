@@ -66,15 +66,15 @@ export function CatalogGallery() {
               opts={{ align: "start", loop: true }}
               className="w-full"
             >
-            <CarouselContent>
-              {topCategories.map((cat) => (
-                <CarouselItem key={cat.id} className="basis-1/2">
-                  <div className="h-[240px]">
-                    <CategoryCard category={cat} />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
+              <CarouselContent>
+                {topCategories.map((cat) => (
+                  <CarouselItem key={cat.id} className="basis-1/2">
+                    <div className="h-[240px]">
+                      <CategoryCard category={cat} />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
             </Carousel>
           </div>
 
@@ -89,11 +89,11 @@ export function CatalogGallery() {
                 {bottomCategories.map((cat) => (
                   <CarouselItem key={cat.id} className="basis-1/3 px-1">
                     <div className="h-[160px]">
-                    <CategoryCard category={cat} />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
+                      <CategoryCard category={cat} />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
             </Carousel>
           </div>
         </div>
