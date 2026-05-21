@@ -24,6 +24,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     { slug: 'corsets', name: 'Корсети' },
     { slug: 'plus-size', name: 'Плюс сайз (всі)' },
     { slug: 'plus-size-swimwear', name: 'Купальники (Plus Size)' },
+    { slug: 'plus-size-erotic', name: 'Еротична білизна (Plus Size)' },
     { slug: 'swimwear', name: 'Купальники' },
     { slug: 'other', name: 'Інше (все)' },
     { slug: 'sportswear', name: 'Спортивний одяг' },

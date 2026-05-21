@@ -400,6 +400,7 @@ export function ProductForm({ initialData, returnParams }: ProductFormProps) {
               <option value="corsets">Корсети</option>
               <option value="plus-size">Плюс сайз (інше)</option>
               <option value="plus-size-swimwear">Купальники (Plus Size)</option>
+              <option value="plus-size-erotic">Еротична білизна (Plus Size)</option>
               <option value="swimwear">Купальники</option>
               <option value="other">Інше (все)</option>
               <option value="sportswear">Спортивний одяг (Інше)</option>

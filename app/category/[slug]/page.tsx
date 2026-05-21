@@ -7,9 +7,9 @@ import { ProductGridClient } from '@/components/product/ProductGridClient';
 
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  
-  const validSlugs = ['panties', 'basic', 'erotic', 'costumes', 'robes', 'pajamas', 'body', 'plus-size', 'new', 'swimwear', 'plus-size-swimwear', 'corsets', 'other', 'sportswear', 'socks', 'stockings', 'gloves', 'wigs'];
-  
+
+  const validSlugs = ['panties', 'basic', 'erotic', 'costumes', 'robes', 'pajamas', 'body', 'plus-size', 'new', 'swimwear', 'plus-size-swimwear', 'plus-size-erotic', 'corsets', 'other', 'sportswear', 'socks', 'stockings', 'gloves', 'wigs'];
+
   if (!validSlugs.includes(slug)) {
     notFound();
   }
@@ -26,6 +26,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
     'new': 'Новинки',
     'swimwear': 'Купальники',
     'plus-size-swimwear': 'Купальники Plus Size',
+    'plus-size-erotic': 'Еротична білизна Plus Size',
     'corsets': 'Корсети',
     'other': 'Інше',
     'sportswear': 'Спортивний одяг',
@@ -54,7 +55,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
           <span>/</span>
           <span className="text-bottle uppercase tracking-wider">{currentTitle}</span>
         </div>
-        
+
         <h1 className="text-4xl md:text-5xl font-light uppercase tracking-[0.2em] text-bottle mb-4 text-center">
           {currentTitle}
         </h1>
@@ -64,16 +65,16 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 w-full max-w-6xl">
           {subcategories.map((sub) => (
-            <Link 
-              key={sub.slug} 
+            <Link
+              key={sub.slug}
               href={`/category/${sub.slug}`}
               className="group relative aspect-[3/4] overflow-hidden bg-bottle/5 rounded-sm"
             >
-              <Image 
-                src={sub.image} 
-                alt={sub.title} 
-                fill 
-                className="object-cover transition-transform duration-700 group-hover:scale-110" 
+              <Image
+                src={sub.image}
+                alt={sub.title}
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
 
@@ -95,10 +96,15 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
   // Якщо це головна категорія Плюс Сайз, показуємо вибір підкатегорій
   if (slug === 'plus-size') {
     const subcategories = [
-      { 
-        title: 'Купальники', 
-        slug: 'plus-size-swimwear', 
+      {
+        title: 'Купальники',
+        slug: 'plus-size-swimwear',
         image: '/categories/plus-size-swimwear.jpg'
+      },
+      {
+        title: 'Еротична білизна',
+        slug: 'plus-size-erotic',
+        image: '/categories/plus-size_erotic.jpg'
       },
     ];
 
@@ -109,7 +115,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
           <span>/</span>
           <span className="text-bottle uppercase tracking-wider">{currentTitle}</span>
         </div>
-        
+
         <h1 className="text-4xl md:text-5xl font-light uppercase tracking-[0.2em] text-bottle mb-4 text-center">
           {currentTitle}
         </h1>
@@ -119,16 +125,16 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
 
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 w-full max-w-6xl">
           {subcategories.map((sub) => (
-            <Link 
-              key={sub.slug} 
+            <Link
+              key={sub.slug}
               href={`/category/${sub.slug}`}
               className="group relative aspect-[3/4] overflow-hidden bg-bottle/5 rounded-sm"
             >
-              <Image 
-                src={sub.image} 
-                alt={sub.title} 
-                fill 
-                className="object-cover transition-transform duration-700 group-hover:scale-110" 
+              <Image
+                src={sub.image}
+                alt={sub.title}
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-110"
               />
               {/* Градієнт знизу для читабельності тексту */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
@@ -157,13 +163,13 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
 
   return (
     <main className="min-h-screen pt-16 pb-12 px-4 container mx-auto flex flex-col items-center">
-      
+
       <div className="w-full flex items-center justify-start gap-2 text-sm text-bottle/60 mb-8 mt-4">
         <Link href="/" className="hover:text-bottle transition-colors">Головна</Link>
         <span>/</span>
         <span className="text-bottle uppercase tracking-wider">{currentTitle}</span>
       </div>
-      
+
       <h1 className="text-4xl md:text-5xl font-light uppercase tracking-[0.2em] text-bottle mb-12 text-center">
         {currentTitle}
       </h1>

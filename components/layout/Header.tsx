@@ -88,6 +88,7 @@ export function Header() {
                          <div className="mt-3 flex flex-col gap-4 pl-4 border-l border-bottle/10">
                            <SheetClose asChild><Link href="/category/plus-size" className="text-sm text-bottle/60 hover:text-bottle italic">Дивитись все</Link></SheetClose>
                            <SheetClose asChild><Link href="/category/plus-size-swimwear" className="text-sm text-bottle/60 hover:text-bottle">Купальники</Link></SheetClose>
+                           <SheetClose asChild><Link href="/category/plus-size-erotic" className="text-sm text-bottle/60 hover:text-bottle">Еротична білизна</Link></SheetClose>
                          </div>
                       </details>
 
@@ -208,6 +209,17 @@ export function Header() {
                                   className="block px-4 py-1.5 hover:text-bottle text-bottle/60 transition-all text-[13px] font-medium border-l border-bottle/10"
                                 >
                                   Купальники
+                                </Link>
+                              </NavigationMenuLink>
+                            </li>
+                            <li>
+                              <NavigationMenuLink asChild>
+                                <Link
+                                  href="/category/plus-size-erotic"
+                                  onClick={handleLinkClick}
+                                  className="block px-4 py-1.5 hover:text-bottle text-bottle/60 transition-all text-[13px] font-medium border-l border-bottle/10"
+                                >
+                                  Еротична білизна
                                 </Link>
                               </NavigationMenuLink>
                             </li>

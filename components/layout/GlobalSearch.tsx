@@ -158,6 +158,7 @@ export function GlobalSearch() {
                       { name: 'Корсети', slug: 'corsets' },
                       { name: 'Купальники', slug: 'swimwear' },
                       { name: 'Купальники Plus Size', slug: 'plus-size-swimwear' },
+                      { name: 'Еротична Plus Size', slug: 'plus-size-erotic' },
                       { name: 'Інше', slug: 'other' },
                     ].map((cat) => (
                       <button
