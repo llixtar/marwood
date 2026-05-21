@@ -22,7 +22,7 @@ const topCategories = [
 const bottomCategories = [
   { id: 5, title: 'Труси', link: '/category/panties', image: '/categories/panties2.jpg' },
   { id: 6, title: 'Боді', link: '/category/body', image: '/categories/body.jpg' },
-  { id: 10, title: 'Корсети', link: '/category/corsets', image: '/categories/corsets.jpg' },
+  { id: 10, title: 'Корсети', link: '/category/corsets', image: '/categories/corsets_1.jpg' },
   { id: 7, title: 'Халати', link: '/category/robes', image: '/categories/robes.jpg' },
   { id: 8, title: 'Піжами', link: '/category/pajamas', image: '/categories/pajamas.jpg' },
   { id: 9, title: 'Плюс сайз', link: '/category/plus-size', image: '/categories/plus-size.jpg' },
